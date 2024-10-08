@@ -2,16 +2,17 @@
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { BasicOption } from '@vben/types';
 
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { useAuthStore } from '#/store';
+import { TokenApi } from '#/api/abpClients/tokenApi';
+// import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
 
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
 
 const MOCK_USER_OPTIONS: BasicOption[] = [
   {
@@ -74,7 +75,7 @@ const formSchema = computed((): VbenFormSchema[] => {
             );
             if (findUser) {
               form.setValues({
-                password: '123456',
+                password: '1q2w3E*',
                 username: findUser.value,
               });
             }
@@ -97,12 +98,18 @@ const formSchema = computed((): VbenFormSchema[] => {
     },
   ];
 });
+
+const api = ref(new TokenApi());
+
+async function handleSubmit(values: any) {
+  await api.value.login(values.username, values.password);
+}
 </script>
 
 <template>
   <AuthenticationLogin
     :form-schema="formSchema"
-    :loading="authStore.loginLoading"
-    @submit="authStore.authLogin"
+    :loading="api.loginLoading"
+    @submit="handleSubmit"
   />
 </template>

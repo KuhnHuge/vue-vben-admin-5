@@ -3,6 +3,8 @@ import { computed, nextTick } from 'vue';
 
 import { VbenButton } from '@vben-core/shadcn-ui';
 
+import { setConfig } from '@surely-vue/table';
+
 interface Props {
   /**
    * 类型
@@ -60,6 +62,9 @@ function toggleTheme(event: MouseEvent) {
     await nextTick();
   });
   transition.ready.then(() => {
+    setConfig({
+      theme: isDark.value ? 'dark' : 'light', // 暗黑主题
+    });
     const clipPath = [
       `circle(0px at ${x}px ${y}px)`,
       `circle(${endRadius}px at ${x}px ${y}px)`,

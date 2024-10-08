@@ -7,9 +7,10 @@ import { startProgress, stopProgress } from '@vben/utils';
 
 import { useTitle } from '@vueuse/core';
 
+import { TokenApi } from '#/api/abpClients/tokenApi';
 import { $t } from '#/locales';
 import { coreRouteNames, dynamicRoutes } from '#/router/routes';
-import { useAuthStore } from '#/store';
+// import { useAuthStore } from '#/store';
 
 import { generateAccess } from './access';
 
@@ -60,7 +61,8 @@ function setupAccessGuard(router: Router) {
   router.beforeEach(async (to, from) => {
     const accessStore = useAccessStore();
     const userStore = useUserStore();
-    const authStore = useAuthStore();
+    // const authStore = useAuthStore();
+    const tokenApi = new TokenApi();
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {
       if (to.path === LOGIN_PATH && accessStore.accessToken) {
@@ -98,8 +100,8 @@ function setupAccessGuard(router: Router) {
 
     // 生成路由表
     // 当前登录用户拥有的角色标识列表
-    const userInfo = userStore.userInfo || (await authStore.fetchUserInfo());
-    const userRoles = userInfo.roles ?? [];
+    const userInfo = userStore.userInfo || (await tokenApi.getBasicUserInfo());
+    const userRoles = userInfo?.roles ?? [];
 
     // 生成菜单和路由
     const { accessibleMenus, accessibleRoutes } = await generateAccess({

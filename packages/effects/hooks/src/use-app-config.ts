@@ -15,9 +15,10 @@ export function useAppConfig(
     ? window._VBEN_ADMIN_PRO_APP_CONF_
     : (env as VbenAdminProAppConfigRaw);
 
-  const { VITE_GLOB_API_URL } = config;
+  const { VITE_GLOB_ABP_URL, VITE_GLOB_API_URL } = config;
 
   return {
+    abpUrl: VITE_GLOB_ABP_URL,
     apiURL: VITE_GLOB_API_URL,
   };
 }
