@@ -20,6 +20,7 @@ interface IPermissionTreeItem {
 }
 
 let providerKey = '';
+const expandedKeys = ref<string[]>([]);
 const treeData = ref<IPermissionTreeItem[]>([]);
 const permissionApi = new PermissionApi();
 const [Drawer, drawerApi] = useVbenDrawer({
@@ -135,12 +136,36 @@ function cancelAll(item: IPermissionTreeItem) {
   }
   item.children?.forEach(cancelAll);
 }
+
+function handleExpandAll(item: IPermissionTreeItem) {
+  if (
+    item.children &&
+    item.children.length > 0 &&
+    !expandedKeys.value.includes(item.key)
+  ) {
+    expandedKeys.value.push(item.key);
+  }
+  item.children?.forEach(handleExpandAll);
+}
+
+function handleExpand(keys: string[]) {
+  expandedKeys.value = keys;
+}
 </script>
 
 <template>
   <Drawer title="权限配置" title-tooltip="权限配置">
-    <template #extra> extra</template>
-    <a-tree :show-line="true" :tree-data="treeData">
+    <template #extra>
+      <a-button size="small" @click="treeData?.forEach(handleExpandAll)">
+        展开全部
+      </a-button>
+    </template>
+    <a-tree
+      :expanded-keys="expandedKeys"
+      :show-line="true"
+      :tree-data="treeData"
+      @expand="handleExpand"
+    >
       <template #title="{ data }: { data: IPermissionTreeItem }">
         {{ data.title }}
         <a-switch v-show="data.canModify" v-model:checked="data.isGranted" />
@@ -158,6 +183,14 @@ function cancelAll(item: IPermissionTreeItem) {
           @click="cancelAll(data)"
         >
           取消全部
+        </a-button>
+        <a-button
+          v-if="data.children && data.children.length > 0"
+          dash
+          size="small"
+          @click="handleExpandAll(data)"
+        >
+          展开
         </a-button>
       </template>
     </a-tree>
