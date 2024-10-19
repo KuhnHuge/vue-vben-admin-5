@@ -4,6 +4,13 @@ export default defineConfig(async () => {
   return {
     application: {},
     vite: {
+      css: {
+        preprocessorOptions: {
+          less: {
+            javascriptEnabled: true,
+          },
+        },
+      },
       server: {
         proxy: {
           '/api': {

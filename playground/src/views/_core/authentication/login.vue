@@ -2,16 +2,19 @@
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { BasicOption } from '@vben/types';
 
-import { computed, markRaw } from 'vue';
+import { computed, markRaw, ref } from 'vue';
 
 import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { useAuthStore } from '#/store';
+import { TokenApi } from '#/api/gt-api';
+// import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
 
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
+
+const api = ref(new TokenApi());
 
 const MOCK_USER_OPTIONS: BasicOption[] = [
   {
@@ -27,6 +30,10 @@ const MOCK_USER_OPTIONS: BasicOption[] = [
     value: 'jack',
   },
 ];
+
+async function handleSubmit(values: any) {
+  await api.value.login(values.username, values.password);
+}
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -75,7 +82,7 @@ const formSchema = computed((): VbenFormSchema[] => {
             if (findUser) {
               form.setValues({
                 password: '123456',
-                username: findUser.value,
+                username: 'kuhn-97@outlook.com',
               });
             }
           }
@@ -109,7 +116,7 @@ const formSchema = computed((): VbenFormSchema[] => {
 <template>
   <AuthenticationLogin
     :form-schema="formSchema"
-    :loading="authStore.loginLoading"
-    @submit="authStore.authLogin"
+    :loading="api.loginLoading"
+    @submit="handleSubmit"
   />
 </template>

@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "@surely-vue/table": "^4.3.12",
     "@vben-core/composables": "workspace:*",
     "@vben-core/form-ui": "workspace:*",
     "@vben-core/layout-ui": "workspace:*",

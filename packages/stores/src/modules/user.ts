@@ -1,11 +1,15 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
-interface BasicUserInfo {
+export interface BasicUserInfo {
   [key: string]: any;
   /**
    * 头像
    */
   avatar: string;
+  /**
+   * 邮箱
+   */
+  email: string | undefined;
   /**
    * 用户昵称
    */

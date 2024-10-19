@@ -29,6 +29,8 @@
     "#/*": "./src/*"
   },
   "dependencies": {
+    "@skit/x.surely-vue-table": "^0.2.0",
+    "@surely-vue/table": "^4.3.12",
     "@tanstack/vue-query": "catalog:",
     "@vben/access": "workspace:*",
     "@vben/common-ui": "workspace:*",
@@ -46,6 +48,7 @@
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
     "ant-design-vue": "catalog:",
+    "axios": "^1.7.7",
     "dayjs": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
