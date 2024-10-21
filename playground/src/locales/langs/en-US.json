@@ -120,6 +120,52 @@
         "x": "x:",
         "y": "y:"
       }
+    },
+    "orders": {
+      "title": "Orders",
+      "ordersList": {
+        "title": "Orders List",
+        "table": {
+          "no": "Order No",
+          "createDate": "Date",
+          "totalDollar" : "Amount"
+        }
+      },
+      "ordersDetail": {
+        "title": "Order Detail",
+        "nameEn": "Name",
+        "proWeight": "Weight",
+        "proVolume": "Volume",
+        "price": "Price",
+        "qty": "Quantity",
+        "exportQty": "Delivery Quantity"
+      }
+    }
+  },
+  "common": {
+    "title": "Title",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "reset": "Reset",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "operation": "Operation",
+    "details": "Details"
+  },
+  "templates": {
+    "pagination": {
+      "total": "Total [total] items",
+      "pageSize": "[pageSize] items per page",
+      "jump": "Jump to",
+      "page": "page",
+      "totalPage": "[totalPage] pages"
     }
   }
 }
