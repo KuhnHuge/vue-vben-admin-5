@@ -5,6 +5,7 @@ import type {
 
 import { generateAccessible } from '@vben/access';
 import { preferences } from '@vben/preferences';
+import { useTabbarStore } from '@vben/stores';
 
 import { message } from 'ant-design-vue';
 
@@ -22,7 +23,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     IFrameView,
   };
 
-  return await generateAccessible(preferences.app.accessMode, {
+  const accessible = await generateAccessible(preferences.app.accessMode, {
     ...options,
     fetchMenuListAsync: async () => {
       message.loading({
@@ -37,6 +38,27 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
     layoutMap,
     pageMap,
   });
+  const tabbarStore = useTabbarStore();
+  tabbarStore.tabs.forEach((tab) => {
+    if (
+      tab.path.startsWith('/orders/order-details-') &&
+      tab.name &&
+      !options.router.hasRoute(tab.name.toString())
+    ) {
+      // const newRouter = ;
+      options.router.addRoute('ordersManagement', {
+        component: () => import('#/views/orders/order-details.vue'),
+        meta: {
+          keepAlive: true,
+          title: `${$t('page.orders.ordersDetail.title')} ${tab.name.toString().replace('order-details-', '')}`,
+        },
+        name: tab.name,
+        path: `/orders/${tab.name.toString()}`,
+      });
+    }
+  });
+
+  return accessible;
 }
 
 export { generateAccess };

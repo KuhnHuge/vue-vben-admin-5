@@ -133,12 +133,22 @@
       },
       "ordersDetail": {
         "title": "Order Detail",
-        "nameEn": "Name",
-        "proWeight": "Weight",
-        "proVolume": "Volume",
-        "price": "Price",
-        "qty": "Quantity",
-        "exportQty": "Delivery Quantity"
+        "table": {
+          "nameEn": "Parts Name",
+          "proWeight": "Weight Per Piece",
+          "proVolume": "Volume Per Piece",
+          "price": "Price/RMB/EXWGUANGZHOU",
+          "priceDollar": "USD",
+          "qty": "Quantity/pcs or set",
+          "exportQty": "Delivery",
+          "number": "OEM.Num",
+          "amount": "RMB Amount",
+          "minOrderQty": "MOQ",
+          "packQty": "pcs/Carton",
+          "unit": "Unit",
+          "carModel": "Model",
+          "brand": "NO.Brand"
+        }
       }
     }
   },

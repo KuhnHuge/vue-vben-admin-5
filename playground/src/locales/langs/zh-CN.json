@@ -133,12 +133,22 @@
       },
       "ordersDetail": {
         "title": "订单详情",
-        "nameEn": "产品名称",
-        "proWeight": "重量",
-        "proVolume": "体积",
-        "price": "价格",
-        "qty": "数量",
-        "exportQty": "发货数量"
+        "table": {
+          "nameEn": "产品名称",
+          "proWeight": "重量",
+          "proVolume": "体积",
+          "price": "价格",
+          "priceDollar": "美元",
+          "qty": "数量",
+          "exportQty": "发货数量",
+          "number": "OEM.Num",
+          "amount": "金额",
+          "minOrderQty": "起订量",
+          "packQty": "装箱数",
+          "unit": "单位",
+          "carModel": "车型",
+          "brand": "号码品牌"
+        }
       }
     }
   },

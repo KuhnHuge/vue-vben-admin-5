@@ -4,6 +4,24 @@ import * as models from '#/api/gt-api/models';
 import { TokenApi } from '#/api/gt-api/tokenApi';
 
 export class OrderApi extends TokenApi {
+  public async orderItemList(
+    input: models.GtGetOrderPageInput,
+  ): Promise<models.GtPageModel<models.GtOrderItemDataModel> | undefined> {
+    const options = {
+      headers: this.headers,
+    };
+    const axiosRequestArgs: AxiosRequestConfig = {
+      ...options,
+    };
+    const axiosResponse = await this.client.post<
+      AxiosResponse<models.GtPageModel<models.GtOrderItemDataModel>>
+    >('Member.Order/order_item_list', input, axiosRequestArgs);
+    if (axiosResponse?.data) {
+      return axiosResponse.data;
+    }
+    return undefined;
+  }
+
   public async orderList(
     input: models.GtGetPageInput,
   ): Promise<models.GtOrderModel | undefined> {

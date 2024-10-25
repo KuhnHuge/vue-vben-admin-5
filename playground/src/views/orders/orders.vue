@@ -1,23 +1,42 @@
 <script setup lang="ts">
 import type { STablePaginationConfig } from '@surely-vue/table';
 import type { ColumnType } from '@surely-vue/table/dist/src/components/interface';
+import type { RouteRecordRaw } from 'vue-router';
 
-import { onBeforeUnmount, onMounted, type Ref, ref, watch } from 'vue';
+import type { GtOrderDataModel } from '#/api/gt-api/models/gt-order-data-model';
+
+import {
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  type Ref,
+  ref,
+  watch,
+} from 'vue';
+import { useRouter } from 'vue-router';
+
+import { MidFilter } from '@vben/icons';
+
+import dayjs from 'dayjs';
 
 import { OrderApi } from '#/api/gt-api';
+import { FilterChangeHandler } from '#/components/handle-filter-change';
+import TbCustomFilter from '#/components/tb-custom-filter.vue';
+import { FilterValueType } from '#/components/TbColumnType';
+import { getUpdateTableHeight } from '#/components/update-table-height';
 import { $t } from '#/locales';
 
-const screenHeight = ref(0);
+const applyChangeEnabled = ref(false);
+const router = useRouter();
 const api = new OrderApi();
 const columns: Ref<ColumnType[]> = ref([]);
 let dateFormatType = 0;
 const tableMaxHeight = ref(400);
-// const tableRef = ref<HTMLElement | null>(null);
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
 const pagination = ref<STablePaginationConfig>({
   onChange: async (page, pageSize) => {
-    await LoadData(page, pageSize);
+    await loadData(page, pageSize);
   },
   pageSize: 10,
   showQuickJumper: true,
@@ -29,25 +48,42 @@ const pagination = ref<STablePaginationConfig>({
     );
   },
 });
+const updateTableHeight = getUpdateTableHeight('table', tableMaxHeight);
+const filterValue = reactive({
+  createDate: new FilterValueType('date', 'eq', true, [
+    dayjs('2024-01-01'),
+    dayjs('2024-12-31'),
+  ]),
+});
+filterValue.createDate.bindObject = {
+  picker: 'year',
+};
+filterValue.createDate.filterOperations = ['eq', 'between'];
+const filterChangeHandler = new FilterChangeHandler(filterValue);
+watch(
+  () => filterValue,
+  () => {
+    filterChangeHandler.setNextFilterValue(filterValue);
+    applyChangeEnabled.value = filterChangeHandler.isFilterChanged();
+  },
+  { deep: true },
+);
 
 onMounted(async () => {
-  screenHeight.value = window.innerHeight;
-  await LoadData();
-  calculateMaxHeight();
-  // if (tableRef.value) {
-  //   const topOffset = tableRef.value.getBoundingClientRect().top;
-  //   console.log(topOffset);
-  //   console.log(tableRef.value);
-  // }
-  window.addEventListener('resize', updateScreenHeight);
+  await loadData();
+  columns.value = getColumns();
+  await updateTableHeight();
+  window.addEventListener('resize', updateTableHeight);
 });
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateScreenHeight);
+  window.removeEventListener('resize', updateTableHeight);
 });
+
 async function changeDateFormatType() {
   dateFormatType = (dateFormatType + 1) % 3;
-  await LoadData();
+  await loadData();
 }
+
 function formatDate(date: Date) {
   switch (dateFormatType) {
     case 0: {
@@ -64,41 +100,15 @@ function formatDate(date: Date) {
     }
   }
 }
-function calculateMaxHeight() {
-  const table = document.querySelector('#table');
-  const topOffset =
-    table
-      ?.getElementsByClassName('surely-table-body')[0]
-      ?.getBoundingClientRect().top ?? 0;
-  const pagination = table?.getElementsByClassName('ant-pagination');
-  if (pagination && pagination[0]) {
-    const style = getComputedStyle(pagination[0]);
-    tableMaxHeight.value =
-      screenHeight.value -
-      topOffset -
-      pagination[0].clientHeight -
-      Number(style?.marginTop.replace('px', '')) -
-      Number(style.marginBottom.replace('px', ''));
-  } else {
-    tableMaxHeight.value = screenHeight.value - topOffset;
-  }
-}
-function updateScreenHeight() {
-  screenHeight.value = window.innerHeight;
-}
-watch(
-  () => screenHeight.value,
-  () => {
-    calculateMaxHeight();
-  },
-);
-async function LoadData(
+
+async function loadData(
   page: number | undefined = undefined,
   pageSize: number | undefined = undefined,
 ) {
   try {
     loading.value = true;
     const model = await api.orderList({
+      commonFilters: filterChangeHandler.getFilterItems(),
       pageIndex: page ?? pagination.value.current ?? 1,
       pageSize: pageSize ?? pagination.value.pageSize ?? 10,
     });
@@ -107,41 +117,59 @@ async function LoadData(
     pagination.value.current = model.pageIndex;
     pagination.value.pageSize = model.pageSize;
     pagination.value.total = model.total;
-
-    columns.value = [
-      {
-        dataIndex: 'no',
-        title: $t('page.orders.ordersList.table.no'),
-      },
-      {
-        dataIndex: 'createDate',
-        title: $t('page.orders.ordersList.table.createDate'),
-      },
-      {
-        dataIndex: 'totalDollar',
-        title: $t('page.orders.ordersList.table.totalDollar'),
-      },
-      {
-        fixed: 'right',
-        key: 'operation',
-        title: $t('common.operation'),
-        width: 200,
-      },
-    ];
   } finally {
     loading.value = false;
   }
 }
 
-function toDetails() {
-  // const name = `order-details-${Date.now().toString()}`;
-  // const newRouter: RouteRecordRaw = {
-  //   component: () => import('#/views/orders/order-details.vue'),
-  //   name: name,
-  //   path: '/orders/details',
-  // };
-  // router.addRoute('ordersManagement', newRouter);
-  // router.push({ name: name });
+function toDetails(model: GtOrderDataModel) {
+  const name = `order-details-${model.no}`;
+  if (router.hasRoute(name)) {
+    router.push({ name, query: { id: model.id } });
+  } else {
+    const newRouter: RouteRecordRaw = {
+      component: () => import('#/views/orders/order-details.vue'),
+      meta: {
+        keepAlive: true,
+        title: `${$t('page.orders.ordersDetail.title')} ${model.no}`,
+      },
+      name,
+      path: `/orders/${name}`,
+    };
+
+    router.addRoute('ordersManagement', newRouter);
+    router.push({ path: newRouter.path, query: { id: model.id } });
+  }
+}
+
+function getColumns(): ColumnType[] {
+  return [
+    {
+      dataIndex: 'no',
+      title: $t('page.orders.ordersList.table.no'),
+    },
+    {
+      customFilterDropdown: true,
+      dataIndex: 'createDate',
+      title: $t('page.orders.ordersList.table.createDate'),
+    },
+    {
+      dataIndex: 'totalDollar',
+      title: $t('page.orders.ordersList.table.totalDollar'),
+    },
+    {
+      fixed: 'right',
+      key: 'operation',
+      title: $t('common.operation'),
+      width: 200,
+    },
+  ];
+}
+
+async function apply() {
+  filterChangeHandler.apply();
+  applyChangeEnabled.value = false;
+  await loadData(1);
 }
 </script>
 <template>
@@ -154,6 +182,7 @@ function toDetails() {
       :pagination="pagination"
       :scroll="{ y: tableMaxHeight }"
       row-key="id"
+      stripe
     >
       <template #title>
         <div
@@ -163,12 +192,18 @@ function toDetails() {
             justify-content: space-between;
           "
         >
-          <span></span>
-          <div class="table-header-tool">
-            <a-button type="primary" @click="changeDateFormatType">
-              Date Style
+          <div>
+            <a-button
+              :disabled="!applyChangeEnabled"
+              type="primary"
+              @click="apply"
+            >
+              Apply Conditions
             </a-button>
-            <a-button type="primary" @click="LoadData()">
+          </div>
+          <div class="table-header-tool">
+            <a-button @click="changeDateFormatType"> Date Style </a-button>
+            <a-button type="primary" @click="loadData">
               {{ $t('common.refresh') }}
             </a-button>
           </div>
@@ -177,12 +212,31 @@ function toDetails() {
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'operation'">
           <div class="operation-column">
-            <a-button @click="toDetails">{{ $t('common.details') }}</a-button>
+            <a-button @click="toDetails(record)">
+              {{ $t('common.details') }}
+            </a-button>
           </div>
         </template>
-        <template v-if="column.dataIndex === 'createDate'">
+        <template v-else-if="column.dataIndex === 'createDate'">
           {{ record.createDate ? formatDate(new Date(record.createDate)) : '' }}
         </template>
+        <template v-else-if="column.dataIndex === 'totalDollar'">
+          {{ `$${record.totalDollar}` }}
+        </template>
+      </template>
+      <template #customFilterDropdown="{ column }">
+        <TbCustomFilter :column="column" :model-value="filterValue" />
+      </template>
+      <template #customFilterIcon="{ column }">
+        <MidFilter
+          :style="{
+            color:
+              (filterValue[column.dataIndex as keyof typeof filterValue]
+                ?.filterEnable ?? false)
+                ? '#2561ba'
+                : undefined,
+          }"
+        />
       </template>
     </s-table>
   </div>

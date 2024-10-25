@@ -3,6 +3,8 @@ import { computed, nextTick } from 'vue';
 
 import { VbenButton } from '@vben-core/shadcn-ui';
 
+import { setConfig } from '@surely-vue/table';
+
 interface Props {
   /**
    * 类型
@@ -56,6 +58,10 @@ function toggleTheme(event: MouseEvent) {
   );
   // @ts-ignore startViewTransition
   const transition = document.startViewTransition(async () => {
+    setConfig({
+      theme: isDark.value ? 'light' : 'dark', // 暗黑主题
+      // theme: isDark.value ? 'dark' : 'light', // 暗黑主题
+    });
     isDark.value = !isDark.value;
     await nextTick();
   });
