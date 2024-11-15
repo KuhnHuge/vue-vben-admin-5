@@ -7,44 +7,33 @@ import type { GtGetOrderPageInput } from '#/api/gt-api/models';
 import { onBeforeUnmount, onMounted, reactive, type Ref, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import {
-  MidEqual,
-  MidFilter,
-  MidGreaterThan,
-  MidGreaterThanOrEqual,
-  MidLessThan,
-  MidLessThanOrEqual,
-  MidNotEqual,
-  MidUnfoldLessVertical,
-  SvgContainsIcon,
-} from '@vben/icons';
 import { $t } from '@vben/locales';
+import { useUserPageStore } from '@vben/stores';
 
-import { useDebounceFn } from '@vueuse/core';
 import dayjs from 'dayjs';
 
 import { OrderApi } from '#/api/gt-api';
-import {
-  FilterValueType,
-  getFilterOperations,
-} from '#/components/TbColumnType';
+import { FilterValueType } from '#/components/TbColumnType';
+import { getUpdateTableHeight } from '#/components/update-table-height';
 
 // import { Input, InputNumber, DatePicker, RangePicker } from 'ant-design-vue';
 
+const userPageStore = useUserPageStore();
 const api = new OrderApi();
-const updateScreenHeight = useDebounceFn(calculateMaxHeight, 300);
 const route = useRoute();
 const orderId = route.query.id;
 const tableMaxHeight = ref(400);
 const loading = ref(false);
 const columns: Ref<ColumnType[]> = ref([]);
 const dataSource = ref<any[]>([]);
+const updateTableHeight = getUpdateTableHeight('table', tableMaxHeight);
 const pagination = ref<STablePaginationConfig>({
   onChange: async (page, pageSize) => {
     await LoadData(page, pageSize);
-    await updateScreenHeight();
+    await updateTableHeight();
+    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
   },
-  pageSize: 10,
+  pageSize: userPageStore.orderDetailsConfig.pageSize,
   showQuickJumper: true,
   showSizeChanger: true,
   showTotal: (total) => {
@@ -62,17 +51,17 @@ const filterValue = reactive({
   ]),
 });
 filterValue.unit.bindObject = {
-  picker: 'month',
+  picker: 'year',
 };
 
 onMounted(async () => {
   await LoadData();
   columns.value = GetColumn();
-  calculateMaxHeight();
-  window.addEventListener('resize', updateScreenHeight);
+  await updateTableHeight();
+  window.addEventListener('resize', updateTableHeight);
 });
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateScreenHeight);
+  window.removeEventListener('resize', updateTableHeight);
 });
 async function LoadData(
   page: number | undefined = undefined,
@@ -96,33 +85,13 @@ async function LoadData(
   }
 }
 
-function calculateMaxHeight() {
-  const screenHeight = window.innerHeight;
-  const table = document.querySelector('#table');
-  const topOffset =
-    table
-      ?.getElementsByClassName('surely-table-body')[0]
-      ?.getBoundingClientRect().top ?? 0;
-  const pagination = table?.getElementsByClassName('ant-pagination');
-  if (pagination && pagination[0]) {
-    const style = getComputedStyle(pagination[0]);
-    tableMaxHeight.value =
-      screenHeight -
-      topOffset -
-      pagination[0].clientHeight -
-      Number(style?.marginTop.replace('px', '')) -
-      Number(style.marginBottom.replace('px', ''));
-  } else {
-    tableMaxHeight.value = screenHeight - topOffset;
-  }
-}
-
 function GetColumn(): ColumnType[] {
   return [
     {
       autoHeight: true,
-      dataIndex: 'carModel',
+      dataIndex: 'rca_model',
       fixed: true,
+      resizable: true,
       title: $t('page.orders.ordersDetail.table.carModel'),
       width: 200,
     },
@@ -133,12 +102,12 @@ function GetColumn(): ColumnType[] {
       width: 100,
     },
     {
-      dataIndex: 'number',
+      dataIndex: 'oe',
       title: $t('page.orders.ordersDetail.table.number'),
       width: 150,
     },
     {
-      dataIndex: 'nameEn',
+      dataIndex: 'product_name_en',
       title: $t('page.orders.ordersDetail.table.nameEn'),
       width: 180,
     },
@@ -148,19 +117,19 @@ function GetColumn(): ColumnType[] {
       width: 100,
     },
     {
-      dataIndex: 'brand',
+      dataIndex: 'brand_name',
       title: $t('page.orders.ordersDetail.table.brand'),
       width: 100,
     },
     {
       // customFilterDropdown: true,
-      dataIndex: 'unit',
+      dataIndex: 'unit_name',
       title: $t('page.orders.ordersDetail.table.unit'),
       width: 100,
     },
     {
       // customFilterDropdown: true,
-      dataIndex: 'qty',
+      dataIndex: 'quantity',
       title: $t('page.orders.ordersDetail.table.qty'),
       width: 120,
     },
@@ -170,37 +139,37 @@ function GetColumn(): ColumnType[] {
       width: 150,
     },
     {
-      dataIndex: 'priceDollar',
+      dataIndex: 'price',
       title: $t('page.orders.ordersDetail.table.priceDollar'),
       width: 100,
     },
     {
-      dataIndex: 'amount',
+      dataIndex: 'total_price',
       title: $t('page.orders.ordersDetail.table.amount'),
       width: 100,
     },
     {
-      dataIndex: 'minOrderQty',
+      dataIndex: 'min_qty',
       title: $t('page.orders.ordersDetail.table.minOrderQty'),
       width: 100,
     },
     {
-      dataIndex: 'packQty',
+      dataIndex: 'box_qty',
       title: $t('page.orders.ordersDetail.table.packQty'),
       width: 120,
     },
     {
-      dataIndex: 'exportQty',
+      dataIndex: 'export_qty',
       title: $t('page.orders.ordersDetail.table.exportQty'),
       width: 100,
     },
     {
-      dataIndex: 'proWeight',
+      dataIndex: 'weight',
       title: $t('page.orders.ordersDetail.table.proWeight'),
       width: 120,
     },
     {
-      dataIndex: 'proVolume',
+      dataIndex: 'volume',
       title: $t('page.orders.ordersDetail.table.proVolume'),
       width: 120,
     },
@@ -218,7 +187,7 @@ function GetColumn(): ColumnType[] {
       :pagination="pagination"
       :scroll="{ y: tableMaxHeight }"
       auto-header-height
-      row-key="id"
+      row-key="orders_items_id"
       stripe
     >
       <template #title>
@@ -231,14 +200,14 @@ function GetColumn(): ColumnType[] {
         ></div>
       </template>
       <template #headerCell="{ title, column }">
-        <template v-if="column.dataIndex === 'qty'">
+        <template v-if="column.dataIndex === 'quantity'">
           <span style="color: #3c82ee">{{ title }}</span>
         </template>
         <template
           v-else-if="
-            column.dataIndex === 'exportQty' ||
-            column.dataIndex === 'proWeight' ||
-            column.dataIndex === 'proVolume'
+            column.dataIndex === 'export_qty' ||
+            column.dataIndex === 'weight' ||
+            column.dataIndex === 'volume'
           "
         >
           <span style="color: #ee3c66">{{ title }}</span>
@@ -251,220 +220,19 @@ function GetColumn(): ColumnType[] {
         <template v-else-if="column.dataIndex === 'priceDollar'">
           {{ `$${record.priceDollar}` }}
         </template>
-        <template v-else-if="column.dataIndex === 'amount'">
-          {{ `￥${record.amount}` }}
+        <template v-else-if="column.dataIndex === 'total_price'">
+          {{ `￥${record.total_price}` }}
         </template>
-      </template>
-      <template #customFilterDropdown="{ column }">
-        <div style="padding: 8px">
-          <div class="custom-filter-select-area">
-            <a-switch
-              v-model:checked="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .filterEnable
-              "
-              size="small"
-            />
-            <a-select
-              v-model:value="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .selectOperation
-              "
-              :disabled="
-                !filterValue[column.dataIndex as keyof typeof filterValue]
-                  .filterEnable
-              "
-              style="width: 192px"
-            >
-              <a-select-option
-                v-for="item in getFilterOperations(
-                  filterValue[column.dataIndex as keyof typeof filterValue]
-                    .filterType,
-                  filterValue[column.dataIndex as keyof typeof filterValue]
-                    .filterOperations,
-                )"
-                :key="item"
-                :value="item"
-              >
-                <span
-                  v-if="item === 'eq'"
-                  class="filter-operation-select-option"
-                >
-                  <MidEqual />Equal
-                </span>
-                <span
-                  v-else-if="item === 'neq'"
-                  class="filter-operation-select-option"
-                >
-                  <MidNotEqual />Not Equal
-                </span>
-                <span
-                  v-else-if="item === 'gt'"
-                  class="filter-operation-select-option"
-                >
-                  <MidGreaterThan />Greater Than
-                </span>
-                <span
-                  v-else-if="item === 'gte'"
-                  class="filter-operation-select-option"
-                >
-                  <MidGreaterThanOrEqual />Greater Than Or Equal
-                </span>
-                <span
-                  v-else-if="item === 'lt'"
-                  class="filter-operation-select-option"
-                >
-                  <MidLessThan />Less Than
-                </span>
-                <span
-                  v-else-if="item === 'lte'"
-                  class="filter-operation-select-option"
-                >
-                  <MidLessThanOrEqual />Less Than Or Equal
-                </span>
-                <span
-                  v-else-if="item === 'like'"
-                  class="filter-operation-select-option"
-                >
-                  <SvgContainsIcon />Contains
-                </span>
-                <span
-                  v-else-if="item === 'between'"
-                  class="filter-operation-select-option"
-                >
-                  <MidUnfoldLessVertical />Between
-                </span>
-              </a-select-option>
-            </a-select>
-          </div>
-          <div class="custom-filter-area">
-            <component
-              :is="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .component
-              "
-              v-if="
-                (filterValue[column.dataIndex as keyof typeof filterValue]
-                  .componentCode &
-                  1) >
-                0
-              "
-              v-model:value="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .values[0]
-              "
-              :disabled="
-                !filterValue[column.dataIndex as keyof typeof filterValue]
-                  .filterEnable
-              "
-              :style="
-                (filterValue[column.dataIndex as keyof typeof filterValue]
-                  .componentCode &
-                  2) >
-                0
-                  ? 'width: 110px'
-                  : 'width: 230px'
-              "
-              v-bind="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .bindObject
-              "
-            />
-            <div
-              v-if="
-                (filterValue[column.dataIndex as keyof typeof filterValue]
-                  .componentCode &
-                  2) >
-                0
-              "
-            >
-              -
-            </div>
-            <component
-              :is="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .component
-              "
-              v-if="
-                (filterValue[column.dataIndex as keyof typeof filterValue]
-                  .componentCode &
-                  2) >
-                0
-              "
-              v-model:value="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .values[1]
-              "
-              :disabled="
-                !filterValue[column.dataIndex as keyof typeof filterValue]
-                  .filterEnable
-              "
-              v-bind="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .bindObject
-              "
-              style="width: 110px"
-            />
-            <component
-              :is="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .specialComponent
-              "
-              v-if="
-                (filterValue[column.dataIndex as keyof typeof filterValue]
-                  .componentCode &
-                  4) >
-                0
-              "
-              v-model:value="
-                filterValue[column.dataIndex as keyof typeof filterValue].values
-              "
-              :disabled="
-                !filterValue[column.dataIndex as keyof typeof filterValue]
-                  .filterEnable
-              "
-              v-bind="
-                filterValue[column.dataIndex as keyof typeof filterValue]
-                  .bindObject
-              "
-              style="width: 230px"
-            />
-          </div>
-        </div>
-      </template>
-      <template #customFilterIcon="{ column }">
-        <MidFilter
-          :style="{
-            color: filterValue[column.dataIndex as keyof typeof filterValue]
-              .filterEnable
-              ? '#2561ba'
-              : undefined,
-          }"
-        />
+        <template v-else-if="column.dataIndex === 'product_name_en'">
+          {{
+            record.product_name_en == null || record.product_name_en === ''
+              ? record.product_name
+              : record.product_name_en
+          }}
+        </template>
       </template>
     </s-table>
   </div>
 </template>
 
-<style scoped>
-.filter-operation-select-option {
-  display: flex;
-  align-items: center;
-}
-
-.surely-table-filter-dropdown {
-  max-width: 246px;
-}
-
-.custom-filter-select-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.custom-filter-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-</style>
+<style scoped></style>

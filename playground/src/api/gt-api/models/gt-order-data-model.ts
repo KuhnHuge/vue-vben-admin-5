@@ -1,7 +1,8 @@
 export interface GtOrderDataModel {
-  createDate: string;
-  id: number;
-  no: string;
+  create_date: string;
+  orders_id: number;
+  orders_no: string;
+  shipment_status: number;
   total: number;
-  totalDollar: number;
+  total_amount: number;
 }

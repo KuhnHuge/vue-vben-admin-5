@@ -15,6 +15,7 @@ export class FilterValueType {
     | 'lt'
     | 'lte'
     | 'neq' = 'like';
+  public alias?: string;
   public bindObject?: object = {};
   public component?: Component;
   public componentCode: number = 0;
@@ -130,6 +131,7 @@ export function getFilterOperations(
 
 export interface FilterItem {
   column: string;
+  filterType: FilterValueType['filterType'];
   operation: string;
   values: number[] | string[];
 }

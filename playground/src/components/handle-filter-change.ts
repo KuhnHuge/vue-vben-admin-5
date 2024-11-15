@@ -33,7 +33,8 @@ export class FilterChangeHandler {
           values[1] = null;
         }
         filterItems.push({
-          column: key,
+          column: v.alias ?? key,
+          filterType: v.filterType,
           operation: v.selectOperation,
           values,
         });

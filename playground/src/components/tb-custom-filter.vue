@@ -4,33 +4,22 @@ import type { ColumnType } from '@surely-vue/table/dist/src/components/interface
 import { computed } from 'vue';
 
 import {
-  MidEqual,
-  MidGreaterThan,
-  MidGreaterThanOrEqual,
-  MidLessThan,
-  MidLessThanOrEqual,
-  MidNotEqual,
-  MidUnfoldLessVertical,
+  MdiEqual,
+  MdiGreaterThan,
+  MdiGreaterThanOrEqual,
+  MdiLessThan,
+  MdiLessThanOrEqual,
+  MdiNotEqual,
+  MdiUnfoldLessVertical,
   SvgContainsIcon,
 } from '@vben/icons';
 
-// import dayjs, { Dayjs } from 'dayjs';
-
-import {
-  // type FilterItem,
-  // FilterValueType,
-  getFilterOperations,
-} from '#/components/TbColumnType';
+import { getFilterOperations } from '#/components/TbColumnType';
 
 const props = defineProps<{
   column: ColumnType;
   modelValue: any;
 }>();
-
-// const emit = defineEmits<{
-//   (e: 'updateConditions', isCanApply: boolean, value?: FilterItem[]): void;
-//   (e: 'updateModelValue', value: (typeof props)['modelValue']): void;
-// }>();
 
 const filterValue = computed({
   get: () => props.modelValue,
@@ -40,59 +29,10 @@ const filterValue = computed({
     // checkConditions();
   },
 });
-
-// let filterItems: FilterItem[] = [];
-// let currentMd5 = getMd5();
-// let nextMd5 = '';
-//
-// function getMd5() {
-//   try {
-//     filterItems = [];
-//     Object.keys(props.modelValue).forEach((key) => {
-//       const v = props.modelValue[
-//         key as keyof typeof props.modelValue
-//       ] as FilterValueType;
-//       if (!v.filterEnable) return;
-//       filterItems.push({
-//         column: key,
-//         operation: v.selectOperation,
-//         values:
-//           Array.isArray(v.values) &&
-//           v.values.length > 0 &&
-//           v.values[0] instanceof dayjs
-//             ? v.values.map((v) => (v as Dayjs).format('YYYY-MM-DD HH:mm:ss'))
-//             : (v.values as any[]),
-//       });
-//     });
-//     const s = JSON.stringify(filterItems);
-//     console.log(s);
-//     // return CryptoJS.MD5(s).toString();
-//     return s;
-//   } catch (error) {
-//     console.log(error);
-//     return '';
-//   }
-// }
-// watch(
-//   () => props.modelValue,
-//   () => {
-//     checkConditions();
-//   },
-//   { deep: true },
-// );
-// function checkConditions() {
-//   const md5 = getMd5();
-//   if (currentMd5 === md5) {
-//     emit('updateConditions', false);
-//   } else {
-//     nextMd5 = md5;
-//     emit('updateConditions', true, filterItems);
-//   }
-// }
 </script>
 
 <template>
-  <div style=" max-width: 246px;padding: 8px">
+  <div style="max-width: 246px; padding: 8px">
     <div class="custom-filter-select-area">
       <a-switch
         v-model:checked="
@@ -122,49 +62,49 @@ const filterValue = computed({
           :value="item"
         >
           <span v-if="item === 'eq'" class="filter-operation-select-option">
-            <MidEqual />Equal
+            <MdiEqual />Equal
           </span>
           <span
             v-else-if="item === 'neq'"
             class="filter-operation-select-option"
           >
-            <MidNotEqual />Not Equal
+            <MdiNotEqual />Not Equal
           </span>
           <span
             v-else-if="item === 'gt'"
             class="filter-operation-select-option"
           >
-            <MidGreaterThan />Greater Than
+            <MdiGreaterThan />Greater Than
           </span>
           <span
             v-else-if="item === 'gte'"
             class="filter-operation-select-option"
           >
-            <MidGreaterThanOrEqual />Greater Than Or Equal
+            <MdiGreaterThanOrEqual />Greater Than Or Equal
           </span>
           <span
             v-else-if="item === 'lt'"
             class="filter-operation-select-option"
           >
-            <MidLessThan />Less Than
+            <MdiLessThan />Less Than
           </span>
           <span
             v-else-if="item === 'lte'"
             class="filter-operation-select-option"
           >
-            <MidLessThanOrEqual />Less Than Or Equal
+            <MdiLessThanOrEqual />Less Than Or Equal
           </span>
           <span
             v-else-if="item === 'like'"
             class="filter-operation-select-option"
           >
-            <SvgContainsIcon />Contains
+            <SvgContainsIcon style="width: 24px; height: auto" />&nbsp;Contains
           </span>
           <span
             v-else-if="item === 'between'"
             class="filter-operation-select-option"
           >
-            <MidUnfoldLessVertical />Between
+            <MdiUnfoldLessVertical />Between
           </span>
         </a-select-option>
       </a-select>

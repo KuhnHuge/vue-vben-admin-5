@@ -15,7 +15,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { MdiFilter /* , MdiSettings*/ } from '@vben/icons';
+import { MdiFilter } from '@vben/icons';
 import { useUserPageStore } from '@vben/stores';
 
 import dayjs from 'dayjs';
@@ -115,7 +115,7 @@ async function loadData(
 ) {
   try {
     loading.value = true;
-    const model = await api.orderList({
+    const model = await api.orderShipmentList({
       commonFilters: filterChangeHandler.getFilterItems(),
       pageIndex: page ?? pagination.value.current ?? 1,
       pageSize: pageSize ?? pagination.value.pageSize ?? 10,
@@ -167,10 +167,10 @@ function getColumns(): ColumnType[] {
       title: $t('page.orders.ordersList.table.no'),
     },
     {
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'shipment_status',
+      key: 'shipment_status',
       resizable: true,
-      title: 'status',
+      title: 'Shipment Status',
     },
     {
       customFilterDropdown: true,
@@ -258,14 +258,8 @@ async function apply() {
         <template v-else-if="column.dataIndex === 'total_amount'">
           {{ `$${record.total_amount ?? '0.00'}` }}
         </template>
-        <template v-else-if="column.dataIndex === 'status'">
-          <span v-if="record.status === 2" style="color: #00a000">
-            Confirmed
-          </span>
-          <span v-else-if="record.status === 9" style="color: #959595">
-            Finished
-          </span>
-          <span v-else style="color: #009fa0">Pending</span>
+        <template v-else-if="column.dataIndex === 'shipment_status'">
+          {{ `${Number(record.shipment_status ?? 0).toFixed(2)}%` }}
         </template>
       </template>
       <template #customFilterDropdown="{ column }">

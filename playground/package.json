@@ -50,8 +50,12 @@
     "ant-design-vue": "catalog:",
     "axios": "^1.7.7",
     "dayjs": "catalog:",
+    "lodash": "^4.17.21",
     "pinia": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.12"
   }
 }

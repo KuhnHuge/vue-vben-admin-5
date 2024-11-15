@@ -9,6 +9,7 @@ export class OrderApi extends TokenApi {
   ): Promise<models.GtPageModel<models.GtOrderItemDataModel> | undefined> {
     const options = {
       headers: this.headers,
+      params: { XDEBUG_SESSION_START: this.debugParam },
     };
     const axiosRequestArgs: AxiosRequestConfig = {
       ...options,
@@ -27,6 +28,7 @@ export class OrderApi extends TokenApi {
   ): Promise<models.GtOrderModel | undefined> {
     const options = {
       headers: this.headers,
+      params: { XDEBUG_SESSION_START: this.debugParam },
     };
     const axiosRequestArgs: AxiosRequestConfig = {
       ...options,
@@ -34,6 +36,25 @@ export class OrderApi extends TokenApi {
     const axiosResponse = await this.client.post<
       AxiosResponse<models.GtOrderModel>
     >('Member.Order/order_list', input, axiosRequestArgs);
+    if (axiosResponse?.data) {
+      return axiosResponse.data;
+    }
+    return undefined;
+  }
+
+  public async orderShipmentList(
+    input: models.GtGetPageInput,
+  ): Promise<models.GtOrderModel | undefined> {
+    const options = {
+      headers: this.headers,
+      params: { XDEBUG_SESSION_START: this.debugParam },
+    };
+    const axiosRequestArgs: AxiosRequestConfig = {
+      ...options,
+    };
+    const axiosResponse = await this.client.post<
+      AxiosResponse<models.GtOrderModel>
+    >('Member.Order/order_shipment_list', input, axiosRequestArgs);
     if (axiosResponse?.data) {
       return axiosResponse.data;
     }

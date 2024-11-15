@@ -37,11 +37,13 @@ const { dlzURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
 export class TokenApi {
   protected client: RequestClient;
+  protected debugParam: string;
   protected headers = new AxiosHeaders();
   protected loginClient: RequestClient;
   private router;
   public loginLoading = false;
   constructor(client?: RequestClient) {
+    this.debugParam = '18174';
     this.loginClient = new RequestClient({ baseURL: dlzURL });
     this.loginClient.addResponseInterceptor(
       errorMessageResponseInterceptor((msg) => message.error(msg)),
@@ -154,6 +156,7 @@ export class TokenApi {
   public async getUserInfo(): Promise<AxiosResponse<GtMemberResult>> {
     const options = {
       headers: this.headers,
+      params: { XDEBUG_SESSION_START: this.debugParam },
     };
     const axiosRequestArgs: AxiosRequestConfig = {
       ...options,
