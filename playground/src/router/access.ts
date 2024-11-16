@@ -55,6 +55,20 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
         name: tab.name,
         path: `/orders/${tab.name.toString()}`,
       });
+    } else if (
+      tab.path.startsWith('/order-shipment/order-details-') &&
+      tab.name &&
+      !options.router.hasRoute(tab.name.toString())
+    ) {
+      options.router.addRoute('ordersShipmentManagement', {
+        component: () => import('#/views/shipment/order-shipment-details.vue'),
+        meta: {
+          keepAlive: true,
+          title: `${$t('page.orders.ordersDetail.title')} ${tab.name.toString().replace('order-details-', '')}`,
+        },
+        name: tab.name,
+        path: `/order-shipment/${tab.name.toString()}`,
+      });
     }
   });
 
