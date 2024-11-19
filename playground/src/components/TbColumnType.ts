@@ -1,3 +1,4 @@
+import type { ColumnType } from '@surely-vue/table/dist/src/components/interface';
 import type { Dayjs } from 'dayjs';
 
 import type { Component } from 'vue';
@@ -134,4 +135,9 @@ export interface FilterItem {
   filterType: FilterValueType['filterType'];
   operation: string;
   values: number[] | string[];
+}
+
+export interface TbColumnType extends ColumnType {
+  alias?: string;
+  headerToolTip?: string;
 }

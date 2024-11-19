@@ -43,7 +43,7 @@ export class TokenApi {
   private router;
   public loginLoading = false;
   constructor(client?: RequestClient) {
-    this.debugParam = '18174';
+    this.debugParam = '19538';
     this.loginClient = new RequestClient({ baseURL: dlzURL });
     this.loginClient.addResponseInterceptor(
       errorMessageResponseInterceptor((msg) => message.error(msg)),

@@ -147,7 +147,7 @@
           "packQty": "pcs/Carton",
           "unit": "Unit",
           "carModel": "Model",
-          "brand": "NO.Brand"
+          "brand": "Brand"
         }
       }
     }

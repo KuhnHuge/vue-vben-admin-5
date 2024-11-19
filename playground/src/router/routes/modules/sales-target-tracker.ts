@@ -8,21 +8,22 @@ const routes: RouteRecordRaw[] = [
     component: BasicLayout,
     meta: {
       icon: 'icon-park-outline:history-query',
-      order: 3001,
-      title: 'Shipment Status',
+      order: 3003,
+      title: 'Sales Target Tracker',
     },
-    name: 'ordersShipmentManagement',
-    path: '/ordersShipmentManagement',
-    redirect: '/ordersShipment',
+    name: 'salesTarget',
+    path: '/salesTarget',
+    redirect: '/salesTargetTracker',
     children: [
       {
-        name: 'ordersShipment',
-        path: '/ordersShipment',
-        component: () => import('#/views/shipment/order-shipment.vue'),
+        name: 'salesTargetTracker',
+        path: '/salesTargetTracker',
+        component: () =>
+          import('#/views/dashboard/sales-target/sales-target-tracker.vue'),
         meta: {
           icon: '',
           keepAlive: true,
-          title: 'Shipment Status',
+          title: 'Sales Target Tracker',
         },
         children: [],
       },

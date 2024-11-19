@@ -33,3 +33,5 @@ export const MdiUnfoldLessVertical = createIconifyIcon(
 );
 
 export const MdiSettings = createIconifyIcon('mdi:settings');
+
+export const MdiInformation = createIconifyIcon('mdi-light:information');

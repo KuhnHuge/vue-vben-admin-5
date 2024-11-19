@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { STablePaginationConfig } from '@surely-vue/table';
-import type { ColumnType } from '@surely-vue/table/dist/src/components/interface';
+import type {
+  ColumnType,
+  SorterResult,
+} from '@surely-vue/table/dist/src/components/interface';
+import type { TableAction } from '@surely-vue/table/dist/src/components/Table';
 import type { RouteRecordRaw } from 'vue-router';
 
 import type { GtOrderDataModel } from '#/api/gt-api/models/gt-order-data-model';
@@ -23,15 +27,16 @@ import dayjs from 'dayjs';
 import { OrderApi } from '#/api/gt-api';
 import { FilterChangeHandler } from '#/components/handle-filter-change';
 import TbCustomFilter from '#/components/tb-custom-filter.vue';
-import { FilterValueType } from '#/components/TbColumnType';
+import { FilterValueType, type TbColumnType } from '#/components/TbColumnType';
 import { getUpdateTableHeight } from '#/components/update-table-height';
 import { $t } from '#/locales';
 
+const orderBy = ref('create_date desc');
 const userPageStore = useUserPageStore();
 const applyChangeEnabled = ref(false);
 const router = useRouter();
 const api = new OrderApi();
-const columns: Ref<ColumnType[]> = ref([]);
+const columns: Ref<TbColumnType[]> = ref([]);
 let dateFormatType = 0;
 const tableMaxHeight = ref(400);
 const loading = ref(false);
@@ -136,6 +141,25 @@ async function loadData(
     loading.value = false;
   }
 }
+async function tableChange(
+  _pagination: any,
+  _filters: any,
+  sorter: SorterResult<ColumnType>,
+  { action }: { action: TableAction },
+) {
+  if (action !== 'sort') return;
+  const column = columns.value.find((c) => c.dataIndex === sorter.field);
+  if (column && sorter.order) {
+    const orderField = column?.alias ?? sorter.field?.toString();
+    orderBy.value = orderField
+      ? `${orderField} ${sorter.order === 'ascend' ? 'asc' : 'desc'}`
+      : 'create_date desc';
+    await loadData();
+  } else {
+    orderBy.value = 'create_date desc';
+    await loadData();
+  }
+}
 
 function toDetails(model: GtOrderDataModel) {
   const name = `order-details-${model.orders_no}`;
@@ -164,12 +188,14 @@ function getColumns(): ColumnType[] {
       dataIndex: 'orders_no',
       key: 'orders_no',
       resizable: true,
+      sorter: true,
       title: $t('page.orders.ordersList.table.no'),
     },
     {
       dataIndex: 'status',
       key: 'status',
       resizable: true,
+      sorter: true,
       title: 'status',
     },
     {
@@ -177,12 +203,14 @@ function getColumns(): ColumnType[] {
       dataIndex: 'create_date',
       key: 'create_date',
       resizable: true,
+      sorter: true,
       title: $t('page.orders.ordersList.table.createDate'),
     },
     {
       dataIndex: 'total_amount',
       key: 'total_amount',
       resizable: true,
+      sorter: true,
       title: $t('page.orders.ordersList.table.totalDollar'),
     },
     {
@@ -211,6 +239,7 @@ async function apply() {
       :scroll="{ y: tableMaxHeight }"
       row-key="orders_id"
       stripe
+      @change="tableChange"
     >
       <template #title>
         <div
