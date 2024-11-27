@@ -32,7 +32,7 @@ export const shared = defineConfig({
   srcDir: 'src',
   themeConfig: {
     i18nRouting: true,
-    logo: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+    logo: 'https://admin.tibaogroup.com/static/img/logo.png',
     search: {
       options: {
         locales: {

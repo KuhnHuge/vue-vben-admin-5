@@ -17,7 +17,8 @@ function mergeRouteModules(
 
   for (const routeModule of Object.values(routeModules)) {
     const moduleRoutes = (routeModule as RouteModuleType)?.default ?? [];
-    mergedRoutes.push(...moduleRoutes);
+    const newModuleRoutes = moduleRoutes.filter((item) => item.meta?.order > 0);
+    mergedRoutes.push(...newModuleRoutes);
   }
 
   return mergedRoutes;
