@@ -7,8 +7,8 @@ const routes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
-      icon: 'icon-park-outline:history-query',
-      order: 3003,
+      icon: 'mdi:analytics',
+      order: 1,
       title: 'Sales Target Tracker',
     },
     name: 'salesTarget',
@@ -21,7 +21,8 @@ const routes: RouteRecordRaw[] = [
         component: () =>
           import('#/views/dashboard/sales-target/sales-target-tracker.vue'),
         meta: {
-          icon: '',
+          affixTab: true,
+          icon: 'mdi:analytics',
           keepAlive: true,
           title: 'Sales Target Tracker',
         },

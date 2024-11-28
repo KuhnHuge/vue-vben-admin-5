@@ -178,6 +178,7 @@ function toDetails(model: GtOrderDataModel) {
     const newRouter: RouteRecordRaw = {
       component: () => import('#/views/shipment/order-shipment-details.vue'),
       meta: {
+        icon: 'mdi:format-list-bulleted',
         keepAlive: true,
         title: `${$t('page.orders.ordersDetail.title')} ${model.orders_no}`,
       },
@@ -185,7 +186,7 @@ function toDetails(model: GtOrderDataModel) {
       path: `/order-shipment/${name}`,
     };
 
-    router.addRoute('ordersManagement', newRouter);
+    router.addRoute('ordersShipmentManagement', newRouter);
     router.push({ path: newRouter.path, query: { id: model.orders_id } });
   }
 }

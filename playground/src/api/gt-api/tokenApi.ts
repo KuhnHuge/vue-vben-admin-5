@@ -40,10 +40,12 @@ export class TokenApi {
   protected debugParam: string;
   protected headers = new AxiosHeaders();
   protected loginClient: RequestClient;
+  protected timeout: number;
   private router;
   public loginLoading = false;
   constructor(client?: RequestClient) {
-    this.debugParam = '19538';
+    this.timeout = 1000 * 60 * 10;
+    this.debugParam = '17065';
     this.loginClient = new RequestClient({ baseURL: dlzURL });
     this.loginClient.addResponseInterceptor(
       errorMessageResponseInterceptor((msg) => message.error(msg)),
@@ -143,6 +145,7 @@ export class TokenApi {
     this.headers.setContentType('application/x-www-form-urlencoded');
     const options = {
       headers: this.headers,
+      timeout: this.timeout,
     };
     const axiosRequestArgs: AxiosRequestConfig = {
       ...options,
@@ -157,6 +160,7 @@ export class TokenApi {
     const options = {
       headers: this.headers,
       params: { XDEBUG_SESSION_START: this.debugParam },
+      timeout: this.timeout,
     };
     const axiosRequestArgs: AxiosRequestConfig = {
       ...options,

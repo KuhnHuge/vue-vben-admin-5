@@ -2,7 +2,7 @@
 import type { STablePaginationConfig } from '@surely-vue/table';
 import type { ColumnType } from '@surely-vue/table/dist/src/components/interface';
 
-import type { GtGetOrderPageInput } from '#/api/gt-api/models';
+import type { GtGetOrderPageInput, GtOrderInfo } from '#/api/gt-api/models';
 
 import { onBeforeUnmount, onMounted, reactive, type Ref, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -26,13 +26,17 @@ const tableMaxHeight = ref(400);
 const loading = ref(false);
 const columns: Ref<ColumnType[]> = ref([]);
 const dataSource = ref<any[]>([]);
+const orderInfo = ref<GtOrderInfo>({
+  company_name: '...',
+  currency: [],
+  currency_id: 0,
+  delivery_type: '...',
+  orders_no: '...',
+  phone: '...',
+  transport_type: '...',
+});
 const updateTableHeight = getUpdateTableHeight('table', tableMaxHeight);
 const pagination = ref<STablePaginationConfig>({
-  onChange: async (page, pageSize) => {
-    await LoadData(page, pageSize);
-    await updateTableHeight();
-    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
-  },
   pageSize: userPageStore.orderDetailsConfig.pageSize,
   showQuickJumper: true,
   showSizeChanger: true,
@@ -56,6 +60,17 @@ filterValue.unit.bindObject = {
 
 onMounted(async () => {
   await LoadData();
+  pagination.value.onChange = async (page, pageSize) => {
+    await LoadData(page, pageSize);
+    await updateTableHeight();
+    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
+  };
+  const orderInfoResponse = await api.getOrderInfo({
+    orderId: Number(orderId),
+  });
+  if (orderInfoResponse) {
+    orderInfo.value = orderInfoResponse;
+  }
   columns.value = GetColumn();
   await updateTableHeight();
   window.addEventListener('resize', updateTableHeight);
@@ -89,6 +104,13 @@ function GetColumn(): ColumnType[] {
   return [
     {
       autoHeight: true,
+      dataIndex: 'picture',
+      fixed: true,
+      title: 'Picture',
+      width: 80,
+    },
+    {
+      autoHeight: true,
       dataIndex: 'rca_model',
       fixed: true,
       resizable: true,
@@ -103,18 +125,22 @@ function GetColumn(): ColumnType[] {
     },
     {
       dataIndex: 'oe',
+      resizable: true,
       title: $t('page.orders.ordersDetail.table.number'),
       width: 150,
     },
     {
       dataIndex: 'product_name_en',
+      resizable: true,
       title: $t('page.orders.ordersDetail.table.nameEn'),
       width: 180,
     },
     {
-      dataIndex: 'size',
+      autoHeight: true,
+      dataIndex: 'specification_en',
+      resizable: true,
       title: 'Size',
-      width: 100,
+      width: 130,
     },
     {
       dataIndex: 'brand_name',
@@ -139,7 +165,7 @@ function GetColumn(): ColumnType[] {
       width: 150,
     },
     {
-      dataIndex: 'price',
+      dataIndex: 'price_dollar',
       title: $t('page.orders.ordersDetail.table.priceDollar'),
       width: 100,
     },
@@ -179,6 +205,11 @@ function GetColumn(): ColumnType[] {
 
 <template>
   <div>
+    <a-descriptions size="middle">
+      <a-descriptions-item label="Order ID">
+        {{ orderInfo.orders_no }}
+      </a-descriptions-item>
+    </a-descriptions>
     <s-table
       id="table"
       :columns="columns"
@@ -190,15 +221,6 @@ function GetColumn(): ColumnType[] {
       row-key="orders_items_id"
       stripe
     >
-      <template #title>
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          "
-        ></div>
-      </template>
       <template #headerCell="{ title, column }">
         <template v-if="column.dataIndex === 'quantity'">
           <span style="color: #3c82ee">{{ title }}</span>
@@ -214,11 +236,19 @@ function GetColumn(): ColumnType[] {
         </template>
       </template>
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'picture'">
+          <img
+            :alt="record.product_name_en"
+            :src="record.picture"
+            height="40px"
+            width="40px"
+          />
+        </template>
         <template v-if="column.dataIndex === 'price'">
           {{ `￥${record.price}` }}
         </template>
-        <template v-else-if="column.dataIndex === 'priceDollar'">
-          {{ `$${record.priceDollar}` }}
+        <template v-else-if="column.dataIndex === 'price_dollar'">
+          {{ `$${record.price_dollar}` }}
         </template>
         <template v-else-if="column.dataIndex === 'total_price'">
           {{ `￥${record.total_price}` }}

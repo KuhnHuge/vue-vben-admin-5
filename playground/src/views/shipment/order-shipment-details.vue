@@ -137,11 +137,6 @@ const currency_name = computed(() => {
 });
 const updateTableHeight = getUpdateTableHeight('table', tableMaxHeight);
 const pagination = ref<STablePaginationConfig>({
-  onChange: async (page, pageSize) => {
-    await LoadData(page, pageSize);
-    await updateTableHeight();
-    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
-  },
   pageSize: userPageStore.orderDetailsConfig.pageSize,
   showQuickJumper: true,
   showSizeChanger: true,
@@ -193,6 +188,11 @@ const shipmentStatusOptions = ref({
 
 onMounted(async () => {
   await LoadData();
+  pagination.value.onChange = async (page, pageSize) => {
+    await LoadData(page, pageSize);
+    await updateTableHeight();
+    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
+  };
   const orderInfoResponse = await api.getOrderInfo({
     orderId: Number(orderId),
   });
@@ -243,6 +243,13 @@ function GetColumn(): ColumnType[] {
   return [
     {
       autoHeight: true,
+      dataIndex: 'picture',
+      fixed: true,
+      title: 'Picture',
+      width: 80,
+    },
+    {
+      autoHeight: true,
       dataIndex: 'rca_model',
       fixed: true,
       resizable: true,
@@ -250,25 +257,29 @@ function GetColumn(): ColumnType[] {
       width: 200,
     },
     {
-      dataIndex: 'cpid',
+      dataIndex: 'my_no',
       fixed: true,
       title: 'CPID/NID',
-      width: 100,
+      width: 110,
     },
     {
       dataIndex: 'oe',
+      resizable: true,
       title: $t('page.orders.ordersDetail.table.number'),
       width: 150,
     },
     {
       dataIndex: 'product_name_en',
+      resizable: true,
       title: $t('page.orders.ordersDetail.table.nameEn'),
       width: 180,
     },
     {
-      dataIndex: 'size',
+      autoHeight: true,
+      dataIndex: 'specification_en',
+      resizable: true,
       title: 'Size',
-      width: 100,
+      width: 130,
     },
     {
       dataIndex: 'brand_name',
@@ -400,15 +411,6 @@ function formatDate(value) {
       row-key="orders_items_id"
       stripe
     >
-      <template #title>
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          "
-        ></div>
-      </template>
       <template #headerCell="{ title, column }">
         <template v-if="column.dataIndex === 'quantity'">
           <span style="color: #3c82ee">{{ title }}</span>
@@ -424,6 +426,14 @@ function formatDate(value) {
         </template>
       </template>
       <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'picture'">
+          <img
+            :alt="record.product_name_en"
+            :src="record.picture"
+            height="40px"
+            width="40px"
+          />
+        </template>
         <template v-if="column.dataIndex === 'price'">
           {{ `￥${record.price}` }}
         </template>
@@ -446,7 +456,11 @@ function formatDate(value) {
             column.dataIndex === 'updated_delivery_date'
           "
         >
-          {{ formatDate(new Date(record[column.dataIndex])) }}
+          {{
+            record[column.dataIndex]
+              ? formatDate(new Date(record[column.dataIndex]))
+              : ''
+          }}
         </template>
       </template>
     </s-table>

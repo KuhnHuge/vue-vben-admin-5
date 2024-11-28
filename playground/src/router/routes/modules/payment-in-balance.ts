@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
-      icon: 'icon-park-outline:history-query',
+      icon: 'mdi:account-payment-outline',
       order: 3002,
       title: 'Payment in Balance',
     },
@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
         path: '/paymentInBalance',
         component: () => import('#/views/payment/payment-in-balance.vue'),
         meta: {
-          icon: '',
+          icon: 'mdi:account-payment-outline',
           keepAlive: true,
           title: 'Payment in Balance',
         },

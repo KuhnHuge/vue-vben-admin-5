@@ -169,6 +169,7 @@ function toDetails(model: GtOrderDataModel) {
     const newRouter: RouteRecordRaw = {
       component: () => import('#/views/orders/order-details.vue'),
       meta: {
+        icon: 'mdi:format-list-bulleted',
         keepAlive: true,
         title: `${$t('page.orders.ordersDetail.title')} ${model.orders_no}`,
       },

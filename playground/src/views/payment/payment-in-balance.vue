@@ -17,10 +17,8 @@ import {
   ref,
   watch,
 } from 'vue';
-// import { useRouter } from 'vue-router';
 
 import { MdiInformation } from '@vben/icons';
-// import { useUserPageStore } from '@vben/stores';
 
 import dayjs from 'dayjs';
 
@@ -31,6 +29,7 @@ import { FilterValueType, type TbColumnType } from '#/components/TbColumnType';
 import { getUpdateTableHeight } from '#/components/update-table-height';
 // import { $t } from '#/locales';
 
+const left_amount = ref('');
 const applyChangeEnabled = ref(false);
 const api = new OrderApi();
 const columns: Ref<TbColumnType[]> = ref([]);
@@ -69,6 +68,7 @@ async function loadData() {
     const model = await api.payDetailList();
     if (!model) return;
     dataSource.value = model.list as any[];
+    left_amount.value = model.left_amount;
   } finally {
     loading.value = false;
   }
@@ -140,6 +140,11 @@ function getColumns(): TbColumnType[] {
 
 <template>
   <div>
+    <a-descriptions size="middle">
+      <a-descriptions-item label="Initial balance">
+        {{ left_amount }}
+      </a-descriptions-item>
+    </a-descriptions>
     <s-table
       id="table"
       :columns="columns"
@@ -157,20 +162,21 @@ function getColumns(): TbColumnType[] {
             column.dataIndex === 'left_amount'
           "
         >
-          <a-tooltip placement="leftTop">
-            <template #title>{{ column.headerToolTip }} </template>
-            <div
-              style="
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: flex-start;
-              "
-            >
-              <span style="color: #3c82ee">{{ title }}&nbsp;</span>
-              <span><MdiInformation /></span>
-            </div>
-          </a-tooltip>
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: flex-start;
+            "
+          >
+            <span style="color: #3c82ee">{{ title }}&nbsp;</span>
+            <a-tooltip placement="leftTop">
+              <template #title>{{ column.headerToolTip }} </template>
+
+              <span><MdiInformation width="18" /></span>
+            </a-tooltip>
+          </div>
         </template>
       </template>
     </s-table>

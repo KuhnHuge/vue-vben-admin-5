@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
-      icon: 'icon-park-outline:history-query',
+      icon: 'icon-park-twotone:transaction-order',
       order: 3000,
       title: $t('page.orders.title'),
     },
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
         path: '/orders',
         component: () => import('#/views/orders/orders.vue'),
         meta: {
-          icon: '',
+          icon: 'icon-park-twotone:transaction-order',
           keepAlive: true,
           title: $t('page.orders.ordersList.title'),
         },

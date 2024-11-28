@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [
   {
     component: BasicLayout,
     meta: {
-      icon: 'icon-park-outline:history-query',
+      icon: 'majesticons:ship-line',
       order: 3001,
       title: 'Shipment Status',
     },
@@ -20,7 +20,7 @@ const routes: RouteRecordRaw[] = [
         path: '/ordersShipment',
         component: () => import('#/views/shipment/order-shipment.vue'),
         meta: {
-          icon: '',
+          icon: 'majesticons:ship-line',
           keepAlive: true,
           title: 'Shipment Status',
         },

@@ -21,7 +21,8 @@ function calculateMaxHeight(id: string, tableMaxHeight: Ref<number>) {
       topOffset -
       pagination[0].clientHeight -
       Number(style?.marginTop.replace('px', '')) -
-      Number(style.marginBottom.replace('px', ''));
+      Number(style.marginBottom.replace('px', '')) -
+      10;
   } else {
     tableMaxHeight.value = screenHeight - topOffset;
   }
