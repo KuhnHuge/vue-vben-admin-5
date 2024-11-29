@@ -64,7 +64,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
         component: () => import('#/views/shipment/order-shipment-details.vue'),
         meta: {
           keepAlive: true,
-          title: `${$t('page.orders.ordersDetail.title')} ${tab.name.toString().replace('order-details-', '')}`,
+          title: `Shipment Details ${tab.name.toString().replace('shipment-details-', '')}`,
         },
         name: tab.name,
         path: `/order-shipment/${tab.name.toString()}`,

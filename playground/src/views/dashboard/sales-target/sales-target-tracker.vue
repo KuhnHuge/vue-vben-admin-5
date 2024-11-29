@@ -26,7 +26,7 @@ use([
 
 use([GaugeChart, CanvasRenderer]);
 const api = new OrderApi();
-const minYear = 2010;
+const minYear = 2024;
 const currentYear = new Date().getFullYear();
 const years = Array.from(
   { length: currentYear - minYear + 1 },

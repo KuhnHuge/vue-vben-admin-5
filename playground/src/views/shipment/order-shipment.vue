@@ -171,7 +171,7 @@ async function tableChange(
 }
 
 function toDetails(model: GtOrderDataModel) {
-  const name = `order-details-${model.orders_no}`;
+  const name = `shipment-details-${model.orders_no}`;
   if (router.hasRoute(name)) {
     router.push({ name, query: { id: model.orders_id } });
   } else {
@@ -180,7 +180,7 @@ function toDetails(model: GtOrderDataModel) {
       meta: {
         icon: 'mdi:format-list-bulleted',
         keepAlive: true,
-        title: `${$t('page.orders.ordersDetail.title')} ${model.orders_no}`,
+        title: `Shipment Details ${model.orders_no}`,
       },
       name,
       path: `/order-shipment/${name}`,

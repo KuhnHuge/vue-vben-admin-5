@@ -63,7 +63,7 @@ const filterValue = reactive({
 filterValue.create_date.bindObject = {
   picker: 'month',
 };
-filterValue.create_date.filterOperations = ['eq', 'between'];
+filterValue.create_date.filterOperations = ['between'];
 filterValue.orders_no.bindObject = {
   placeholder: 'Order No',
 };

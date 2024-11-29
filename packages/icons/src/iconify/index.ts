@@ -37,3 +37,5 @@ export const MdiSettings = createIconifyIcon('mdi:settings');
 export const MdiInformation = createIconifyIcon('mdi-light:information');
 
 export const MdiAddShoppingCart = createIconifyIcon('mdi:add-shopping-cart');
+
+export const MdiSearch = createIconifyIcon('mdi:search');

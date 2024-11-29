@@ -132,7 +132,7 @@
         }
       },
       "ordersDetail": {
-        "title": "Order Detail",
+        "title": "Order Details",
         "table": {
           "nameEn": "Parts Name",
           "proWeight": "Weight Per Piece",
