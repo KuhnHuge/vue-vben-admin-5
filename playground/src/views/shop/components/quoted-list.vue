@@ -92,49 +92,50 @@ async function addCart(item: GtProductItem, quantity: number) {
           v-for="(item, index) in dataSource"
           :key="item.product_id"
           :style="`background-color:${cardBackgroundColor}`"
-          class="product-card m-2.5 flex h-[450px] w-64 flex-col items-center"
+          class="product-card m-2.5 flex h-[450px] w-[19rem] flex-col items-center"
         >
           <div
-            class="flex h-[250px] w-full flex-col items-center"
+            class="flex h-[200px] w-full flex-col items-center p-[5%]"
             style="background: #fff"
           >
-            <img
-              :alt="item.my_no"
-              :src="item.picture"
-              class="h-[250px] w-auto"
-            />
+            <img :alt="item.my_no" :src="item.picture" class="h-[180px]" />
           </div>
           <div class="w-full pl-2 pr-2">
             <a-divider style="margin: 12px 0" />
           </div>
           <div
-            class="flex w-full flex-col pl-2.5 pr-2.5"
-            style="font-size: 15px; font-weight: 500"
+            class="flex w-full flex-col p-[3%]"
+            style="
+              width: 95%;
+              font-size: 14px;
+              font-weight: 100;
+              background-color: #f4f4f4;
+            "
           >
             <div
               :style="`background-color:${infoBackgroundColor}`"
-              class="flex w-full justify-between pl-1 pr-1"
+              class="flex w-[95%] justify-between pl-[0.6rem] pr-[0.6rem]"
             >
               <span>OE:</span>
               <span>{{ item.oe }}</span>
             </div>
             <div
               :style="`background-color:${infoBackgroundColor}`"
-              class="flex w-full justify-between pl-1 pr-1"
+              class="flex w-[95%] justify-between pl-[0.6rem] pr-[0.6rem]"
             >
               <span>NID:</span>
               <span>{{ item.my_no }}</span>
             </div>
             <div
               :style="`background-color:${infoBackgroundColor}`"
-              class="flex w-full justify-between pl-1 pr-1"
+              class="flex w-[95%] justify-between pl-[0.6rem] pr-[0.6rem]"
             >
               <span>MOQ:</span>
               <span>{{ item.min_qty }}</span>
             </div>
             <div
               :style="`background-color:${infoBackgroundColor};color: #c9465d`"
-              class="flex w-full justify-between pl-1 pr-1"
+              class="flex w-[95%] justify-between pl-[0.6rem] pr-[0.6rem]"
             >
               <span>PRICE:</span>
               <span>{{ item.price }}</span>
@@ -144,11 +145,11 @@ async function addCart(item: GtProductItem, quantity: number) {
           <div class="w-full pl-2 pr-2">
             <a-divider style="margin: 12px 0" />
           </div>
-          <div class="flex w-[225px] justify-between">
+          <div class="flex w-[95%] justify-between">
             <a-input-number
               v-model:value="addCartData[index]"
               :min="0"
-              class="w-[165px]"
+              class="w-[205px]"
             />
             <a-button
               type="primary"
@@ -158,20 +159,21 @@ async function addCart(item: GtProductItem, quantity: number) {
             </a-button>
           </div>
         </div>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
-        <i class="ml-2.5 mr-2.5 w-64"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
+        <i class="m-2.5 w-[19rem]"></i>
       </div>
     </a-card>
     <a-pagination
@@ -190,6 +192,6 @@ async function addCart(item: GtProductItem, quantity: number) {
 .product-card {
   overflow: hidden;
   border-radius: 6px;
-  box-shadow: 0.1em 0.1em 1em rgb(179 179 179 / 35%);
+  box-shadow: 0 0 0 rgb(179 179 179 / 35%);
 }
 </style>
