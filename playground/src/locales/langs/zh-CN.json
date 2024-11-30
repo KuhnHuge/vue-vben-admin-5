@@ -141,7 +141,7 @@
           "priceDollar": "美元",
           "qty": "数量",
           "exportQty": "发货数量",
-          "number": "OEM.Num",
+          "number": "OE No.",
           "amount": "金额",
           "minOrderQty": "起订量",
           "packQty": "装箱数",

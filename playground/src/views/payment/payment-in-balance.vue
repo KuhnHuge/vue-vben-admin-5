@@ -68,7 +68,7 @@ async function loadData() {
     const model = await api.payDetailList();
     if (!model) return;
     dataSource.value = model.list as any[];
-    left_amount.value = model.left_amount;
+    left_amount.value = model.left_amount.toString();
   } finally {
     loading.value = false;
   }
@@ -140,11 +140,37 @@ function getColumns(): TbColumnType[] {
 
 <template>
   <div>
-    <a-descriptions size="middle">
-      <a-descriptions-item label="Initial balance">
-        {{ left_amount }}
-      </a-descriptions-item>
-    </a-descriptions>
+    <div class="m-2.5 flex items-center text-base">
+      <div class="font-bold" style="color: #3c82ee">Initial Balance:</div>
+      <div>￥{{ left_amount }}</div>
+      <a-tooltip placement="rightTop">
+        <template #title>
+          <span class="font-bold">Negative (-):</span><br />
+          <span>
+            The initial balance represents the amount we owe to the customer at
+            the beginning of the period.
+          </span>
+          <br />
+          <span>
+            (This occurs when the customer has made an advance payment or
+            overpaid in the previous period.)
+          </span>
+          <br />
+          <span class="font-bold">Positive (+):</span><br />
+          <span>
+            The initial balance represents the amount the customer owes us at
+            the beginning of the period.
+          </span>
+          <br />
+          <span>
+            (This occurs when there are outstanding invoices or unpaid balances
+            from the previous period.)
+          </span>
+          <br />
+        </template>
+        <span><MdiInformation width="18" /></span>
+      </a-tooltip>
+    </div>
     <s-table
       id="table"
       :columns="columns"
@@ -177,6 +203,20 @@ function getColumns(): TbColumnType[] {
               <span><MdiInformation width="18" /></span>
             </a-tooltip>
           </div>
+        </template>
+      </template>
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'amount'">
+          {{ record.amount ? `$${record.amount}` : '' }}
+        </template>
+        <template v-if="column.key === 'amount_rmb'">
+          {{ record.amount_rmb ? `￥${record.amount_rmb}` : '' }}
+        </template>
+        <template v-if="column.key === 'bill_amount'">
+          {{ record.bill_amount ? `￥${record.bill_amount}` : '' }}
+        </template>
+        <template v-if="column.key === 'left_amount'">
+          {{ record.left_amount ? `￥${record.left_amount}` : '' }}
         </template>
       </template>
     </s-table>

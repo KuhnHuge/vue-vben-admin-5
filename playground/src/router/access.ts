@@ -56,7 +56,7 @@ async function generateAccess(options: GenerateMenuAndRoutesOptions) {
         path: `/orders/${tab.name.toString()}`,
       });
     } else if (
-      tab.path.startsWith('/order-shipment/order-details-') &&
+      tab.path.startsWith('/order-shipment/shipment-details-') &&
       tab.name &&
       !options.router.hasRoute(tab.name.toString())
     ) {

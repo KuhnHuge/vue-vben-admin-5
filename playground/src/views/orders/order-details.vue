@@ -13,10 +13,9 @@ import { useUserPageStore } from '@vben/stores';
 import dayjs from 'dayjs';
 
 import { OrderApi } from '#/api/gt-api';
+import { formatWithCommas } from '#/components/common-extensions';
 import { FilterValueType } from '#/components/TbColumnType';
 import { getUpdateTableHeight } from '#/components/update-table-height';
-
-// import { Input, InputNumber, DatePicker, RangePicker } from 'ant-design-vue';
 
 const userPageStore = useUserPageStore();
 const api = new OrderApi();
@@ -33,6 +32,8 @@ const orderInfo = ref<GtOrderInfo>({
   delivery_type: '...',
   orders_no: '...',
   phone: '...',
+  shipment_status: undefined,
+  total_quantity: 0,
   transport_type: '...',
 });
 const updateTableHeight = getUpdateTableHeight('table', tableMaxHeight);
@@ -47,6 +48,9 @@ const pagination = ref<STablePaginationConfig>({
     );
   },
 });
+const planLoading = ref(false);
+const planColumns: Ref<ColumnType[]> = ref([]);
+const planDataSource = ref<any[]>([]);
 const filterValue = reactive({
   qty: new FilterValueType('number', 'between', false, [0, 100]),
   unit: new FilterValueType('date', 'between', true, [
@@ -59,12 +63,6 @@ filterValue.unit.bindObject = {
 };
 
 onMounted(async () => {
-  await LoadData();
-  pagination.value.onChange = async (page, pageSize) => {
-    await LoadData(page, pageSize);
-    await updateTableHeight();
-    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
-  };
   const orderInfoResponse = await api.getOrderInfo({
     orderId: Number(orderId),
   });
@@ -72,12 +70,30 @@ onMounted(async () => {
     orderInfo.value = orderInfoResponse;
   }
   columns.value = GetColumn();
+  await LoadData();
+  planColumns.value = GetPlanColumn();
+  await LoadPlanData();
+  pagination.value.onChange = async (page, pageSize) => {
+    await LoadData(page, pageSize);
+    await updateTableHeight();
+    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
+  };
   await updateTableHeight();
   window.addEventListener('resize', updateTableHeight);
 });
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight);
 });
+async function LoadPlanData() {
+  try {
+    planLoading.value = true;
+    const model = await api.orderItemPlanList(Number(orderId));
+    if (!model) return;
+    planDataSource.value = model;
+  } finally {
+    planLoading.value = false;
+  }
+}
 async function LoadData(
   page: number | undefined = undefined,
   pageSize: number | undefined = undefined,
@@ -160,15 +176,20 @@ function GetColumn(): ColumnType[] {
       width: 120,
     },
     {
+      dataIndex: 'export_qty',
+      title: $t('page.orders.ordersDetail.table.exportQty'),
+      width: 100,
+    },
+    {
       dataIndex: 'price',
       title: $t('page.orders.ordersDetail.table.price'),
       width: 150,
     },
-    {
-      dataIndex: 'price_dollar',
-      title: $t('page.orders.ordersDetail.table.priceDollar'),
-      width: 100,
-    },
+    // {
+    //   dataIndex: 'price_dollar',
+    //   title: $t('page.orders.ordersDetail.table.priceDollar'),
+    //   width: 100,
+    // },
     {
       dataIndex: 'total_price',
       title: $t('page.orders.ordersDetail.table.amount'),
@@ -185,11 +206,6 @@ function GetColumn(): ColumnType[] {
       width: 120,
     },
     {
-      dataIndex: 'export_qty',
-      title: $t('page.orders.ordersDetail.table.exportQty'),
-      width: 100,
-    },
-    {
       dataIndex: 'weight',
       title: $t('page.orders.ordersDetail.table.proWeight'),
       width: 120,
@@ -201,15 +217,81 @@ function GetColumn(): ColumnType[] {
     },
   ];
 }
+function GetPlanColumn(): ColumnType[] {
+  return [
+    {
+      dataIndex: 'planned_id',
+      title: 'Plan No.',
+      width: 100,
+    },
+    {
+      dataIndex: 'plan_subtotal_qty',
+      title: 'Plan Subtotal Quantity',
+      width: 120,
+    },
+    {
+      dataIndex: 'non_arrival',
+      title: 'Non-Arrival',
+      width: 120,
+    },
+    {
+      dataIndex: 'packed',
+      title: 'Packed',
+      width: 120,
+    },
+    {
+      dataIndex: 'shipped',
+      title: 'Shipped',
+      width: 120,
+    },
+  ];
+}
 </script>
 
 <template>
   <div>
-    <a-descriptions size="middle">
-      <a-descriptions-item label="Order ID">
+    <a-descriptions
+      :column="2"
+      bordered
+      class="m-2.5 max-w-[700px]"
+      size="middle"
+    >
+      <a-descriptions-item :span="2" label="Order ID">
         {{ orderInfo.orders_no }}
       </a-descriptions-item>
+      <a-descriptions-item label="Days Since Order Placed">
+        {{ orderInfo.days }}
+      </a-descriptions-item>
+      <a-descriptions-item :span="1" label="Order Total Quantity">
+        {{ orderInfo.total_quantity }}
+      </a-descriptions-item>
     </a-descriptions>
+    <s-table
+      :columns="planColumns"
+      :data-source="planDataSource"
+      :loading="planLoading"
+      :pagination="false"
+      :scroll="{ y: 300 }"
+      class="mb-[30px]"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'non_arrival'">
+          {{
+            `${((record.non_arrival / record.plan_subtotal_qty) * 100).toFixed(2)}%`
+          }}
+        </template>
+        <template v-if="column.dataIndex === 'packed'">
+          {{
+            `${((record.packed / record.plan_subtotal_qty) * 100).toFixed(2)}%`
+          }}
+        </template>
+        <template v-if="column.dataIndex === 'shipped'">
+          {{
+            `${((record.shipped / record.plan_subtotal_qty) * 100).toFixed(2)}%`
+          }}
+        </template>
+      </template>
+    </s-table>
     <s-table
       id="table"
       :columns="columns"
@@ -222,22 +304,17 @@ function GetColumn(): ColumnType[] {
       stripe
     >
       <template #headerCell="{ title, column }">
-        <template v-if="column.dataIndex === 'quantity'">
-          <span style="color: #3c82ee">{{ title }}</span>
-        </template>
         <template
-          v-else-if="
-            column.dataIndex === 'export_qty' ||
-            column.dataIndex === 'weight' ||
-            column.dataIndex === 'volume'
+          v-if="
+            column.dataIndex === 'export_qty' || column.dataIndex === 'quantity'
           "
         >
-          <span style="color: #ee3c66">{{ title }}</span>
+          <span style="color: #3c82ee">{{ title }}</span>
         </template>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'picture'">
-          <img
+          <a-image
             :alt="record.product_name_en"
             :src="record.picture"
             height="40px"
@@ -245,13 +322,13 @@ function GetColumn(): ColumnType[] {
           />
         </template>
         <template v-if="column.dataIndex === 'price'">
-          {{ `￥${record.price}` }}
+          {{ `￥${formatWithCommas(record.price)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'price_dollar'">
-          {{ `$${record.price_dollar}` }}
+          {{ `$${formatWithCommas(record.price_dollar)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'total_price'">
-          {{ `￥${record.total_price}` }}
+          {{ `￥${formatWithCommas(record.total_price)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'product_name_en'">
           {{

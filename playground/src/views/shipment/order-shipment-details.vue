@@ -27,6 +27,7 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 
 import { OrderApi } from '#/api/gt-api';
+import { formatWithCommas } from '#/components/common-extensions';
 import { FilterValueType } from '#/components/TbColumnType';
 import { getUpdateTableHeight } from '#/components/update-table-height';
 
@@ -53,9 +54,12 @@ const orderInfo = ref<GtOrderInfo>({
   company_name: '...',
   currency: [],
   currency_id: 0,
+  days: 0,
   delivery_type: '...',
   orders_no: '...',
   phone: '...',
+  shipment_status: undefined,
+  total_quantity: 0,
   transport_type: '...',
 });
 const d_s_enums = {
@@ -179,7 +183,7 @@ const shipmentStatusOptions = ref({
   title: {
     left: 'left',
     // subtext: 'Fake Data',
-    text: 'Shipment Status',
+    // text: 'Shipment Status',
   },
   tooltip: {
     trigger: 'item',
@@ -187,12 +191,6 @@ const shipmentStatusOptions = ref({
 });
 
 onMounted(async () => {
-  await LoadData();
-  pagination.value.onChange = async (page, pageSize) => {
-    await LoadData(page, pageSize);
-    await updateTableHeight();
-    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
-  };
   const orderInfoResponse = await api.getOrderInfo({
     orderId: Number(orderId),
   });
@@ -210,6 +208,12 @@ onMounted(async () => {
     ];
   }
   columns.value = GetColumn();
+  await LoadData();
+  pagination.value.onChange = async (page, pageSize) => {
+    await LoadData(page, pageSize);
+    await updateTableHeight();
+    userPageStore.setOrderDetailsConfig((c) => (c.pageSize = pageSize ?? 10));
+  };
   await updateTableHeight();
   window.addEventListener('resize', updateTableHeight);
 });
@@ -299,15 +303,30 @@ function GetColumn(): ColumnType[] {
       width: 120,
     },
     {
+      dataIndex: 'export_qty',
+      title: $t('page.orders.ordersDetail.table.exportQty'),
+      width: 100,
+    },
+    {
+      dataIndex: 'available_stock_quantity',
+      title: 'Available Stock Quantity',
+      width: 130,
+    },
+    {
+      dataIndex: 'qfqty',
+      title: 'Non-Arrival Quantity',
+      width: 120,
+    },
+    {
       dataIndex: 'price',
       title: $t('page.orders.ordersDetail.table.price'),
       width: 150,
     },
-    {
-      dataIndex: 'price',
-      title: $t('page.orders.ordersDetail.table.priceDollar'),
-      width: 100,
-    },
+    // {
+    //   dataIndex: 'price',
+    //   title: $t('page.orders.ordersDetail.table.priceDollar'),
+    //   width: 100,
+    // },
     {
       dataIndex: 'total_price',
       title: $t('page.orders.ordersDetail.table.amount'),
@@ -322,11 +341,6 @@ function GetColumn(): ColumnType[] {
       dataIndex: 'box_qty',
       title: $t('page.orders.ordersDetail.table.packQty'),
       width: 120,
-    },
-    {
-      dataIndex: 'export_qty',
-      title: $t('page.orders.ordersDetail.table.exportQty'),
-      width: 100,
     },
     {
       dataIndex: 'weight',
@@ -373,7 +387,7 @@ function formatDate(value) {
         </a-descriptions>
         <a-descriptions bordered size="middle" title="Order Information">
           <a-descriptions-item label="Company Name" span="2">
-            {{ orderInfo.company_name }}
+            ******
           </a-descriptions-item>
           <a-descriptions-item label="Delivery Method" span="2">
             {{ delivery_type_desc }}
@@ -385,10 +399,10 @@ function formatDate(value) {
             {{ transport_type_desc }}
           </a-descriptions-item>
           <a-descriptions-item label="Consignee" span="2">
-            Consignee
+            ******
           </a-descriptions-item>
           <a-descriptions-item label="Phone No." span="2">
-            {{ orderInfo.phone }}
+            ***********
           </a-descriptions-item>
         </a-descriptions>
       </div>
@@ -412,22 +426,17 @@ function formatDate(value) {
       stripe
     >
       <template #headerCell="{ title, column }">
-        <template v-if="column.dataIndex === 'quantity'">
-          <span style="color: #3c82ee">{{ title }}</span>
-        </template>
         <template
-          v-else-if="
-            column.dataIndex === 'export_qty' ||
-            column.dataIndex === 'weight' ||
-            column.dataIndex === 'volume'
+          v-if="
+            column.dataIndex === 'export_qty' || column.dataIndex === 'quantity'
           "
         >
-          <span style="color: #ee3c66">{{ title }}</span>
+          <span style="color: #3c82ee">{{ title }}</span>
         </template>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'picture'">
-          <img
+          <a-image
             :alt="record.product_name_en"
             :src="record.picture"
             height="40px"
@@ -435,13 +444,13 @@ function formatDate(value) {
           />
         </template>
         <template v-if="column.dataIndex === 'price'">
-          {{ `￥${record.price}` }}
+          {{ `￥${formatWithCommas(record.price)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'priceDollar'">
-          {{ `$${record.priceDollar}` }}
+          {{ `$${formatWithCommas(record.priceDollar)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'total_price'">
-          {{ `￥${record.total_price}` }}
+          {{ `￥${formatWithCommas(record.total_price)}` }}
         </template>
         <template v-else-if="column.dataIndex === 'product_name_en'">
           {{
@@ -461,6 +470,9 @@ function formatDate(value) {
               ? formatDate(new Date(record[column.dataIndex]))
               : ''
           }}
+        </template>
+        <template v-else-if="column.dataIndex === 'qfqty'">
+          {{ Number(record.qfqty ?? '0') < 0 ? '0' : (record.qfqty ?? '0') }}
         </template>
       </template>
     </s-table>

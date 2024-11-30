@@ -45,7 +45,7 @@ export class TokenApi {
   public loginLoading = false;
   constructor(client?: RequestClient) {
     this.timeout = 1000 * 60 * 10;
-    this.debugParam = '17065';
+    this.debugParam = '19898';
     this.loginClient = new RequestClient({ baseURL: dlzURL });
     this.loginClient.addResponseInterceptor(
       errorMessageResponseInterceptor((msg) => message.error(msg)),

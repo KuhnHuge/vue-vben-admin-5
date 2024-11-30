@@ -19,12 +19,13 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { MdiFilter /* , MdiSettings*/ } from '@vben/icons';
+import { MdiFilterCog /* , MdiSettings*/ } from '@vben/icons';
 import { useUserPageStore } from '@vben/stores';
 
 import dayjs from 'dayjs';
 
 import { OrderApi } from '#/api/gt-api';
+import { formatWithCommas } from '#/components/common-extensions';
 import { FilterChangeHandler } from '#/components/handle-filter-change';
 import TbCustomFilter from '#/components/tb-custom-filter.vue';
 import { FilterValueType, type TbColumnType } from '#/components/TbColumnType';
@@ -122,6 +123,7 @@ async function loadData(
     loading.value = true;
     const model = await api.orderList({
       commonFilters: filterChangeHandler.getFilterItems(),
+      orderBy: orderBy.value,
       pageIndex: page ?? pagination.value.current ?? 1,
       pageSize: pageSize ?? pagination.value.pageSize ?? 10,
     });
@@ -196,8 +198,7 @@ function getColumns(): ColumnType[] {
       dataIndex: 'status',
       key: 'status',
       resizable: true,
-      sorter: true,
-      title: 'status',
+      title: 'Status',
     },
     {
       customFilterDropdown: true,
@@ -286,7 +287,7 @@ async function apply() {
           }}
         </template>
         <template v-else-if="column.dataIndex === 'total_amount'">
-          {{ `$${record.total_amount ?? '0.00'}` }}
+          {{ `￥${formatWithCommas(record.total_amount ?? '0.00')}` }}
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <span v-if="record.status === 2" style="color: #00a000">
@@ -302,7 +303,7 @@ async function apply() {
         <TbCustomFilter :column="column" :model-value="filterValue" />
       </template>
       <template #customFilterIcon="{ column }">
-        <MdiFilter
+        <MdiFilterCog
           :style="{
             color:
               (filterValue[column.dataIndex as keyof typeof filterValue]
@@ -310,6 +311,7 @@ async function apply() {
                 ? '#2561ba'
                 : undefined,
           }"
+          width="18"
         />
       </template>
     </s-table>

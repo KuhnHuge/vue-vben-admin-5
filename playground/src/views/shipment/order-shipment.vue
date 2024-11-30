@@ -19,7 +19,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { MdiFilter } from '@vben/icons';
+import { MdiFilterCog } from '@vben/icons';
 import { useUserPageStore } from '@vben/stores';
 
 import dayjs from 'dayjs';
@@ -29,6 +29,7 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 
 import { OrderApi } from '#/api/gt-api';
+import { formatWithCommas } from '#/components/common-extensions';
 import { FilterChangeHandler } from '#/components/handle-filter-change';
 import TbCustomFilter from '#/components/tb-custom-filter.vue';
 import { FilterValueType, type TbColumnType } from '#/components/TbColumnType';
@@ -85,13 +86,13 @@ watch(
 );
 
 onMounted(async () => {
+  columns.value = getColumns();
   await loadData();
   pagination.value.onChange = async (page, pageSize) => {
     await loadData(page, pageSize);
     await updateTableHeight();
     userPageStore.setOrdersConfig((c) => (c.pageSize = pageSize ?? 10));
   };
-  columns.value = getColumns();
   await updateTableHeight();
   window.addEventListener('resize', updateTableHeight);
 });
@@ -294,7 +295,7 @@ async function apply() {
           }}
         </template>
         <template v-else-if="column.dataIndex === 'total_amount'">
-          {{ `$${record.total_amount ?? '0.00'}` }}
+          {{ `￥${formatWithCommas(record.total_amount ?? '0.00')}` }}
         </template>
         <template v-else-if="column.dataIndex === 'shipment_status'">
           {{ `${Number(record.shipment_status ?? 0).toFixed(2)}%` }}
@@ -304,7 +305,7 @@ async function apply() {
         <TbCustomFilter :column="column" :model-value="filterValue" />
       </template>
       <template #customFilterIcon="{ column }">
-        <MdiFilter
+        <MdiFilterCog
           :style="{
             color:
               (filterValue[column.dataIndex as keyof typeof filterValue]
@@ -312,6 +313,7 @@ async function apply() {
                 ? '#2561ba'
                 : undefined,
           }"
+          width="18"
         />
       </template>
     </s-table>

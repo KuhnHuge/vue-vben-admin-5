@@ -83,6 +83,25 @@ export class OrderApi extends TokenApi {
     }
     return undefined;
   }
+  public async orderItemPlanList(
+    order_id: number,
+  ): Promise<models.GtOrderPlanItem[] | undefined> {
+    const options = {
+      headers: this.headers,
+      params: { XDEBUG_SESSION_START: this.debugParam },
+      timeout: this.timeout,
+    };
+    const axiosRequestArgs: AxiosRequestConfig = {
+      ...options,
+    };
+    const axiosResponse = await this.client.post<
+      AxiosResponse<models.GtOrderPlanItem[]>
+    >('Member.Order/order_item_plan_list', { order_id }, axiosRequestArgs);
+    if (axiosResponse?.data) {
+      return axiosResponse.data;
+    }
+    return undefined;
+  }
   public async orderList(
     input: models.GtGetPageInput,
   ): Promise<models.GtOrderModel | undefined> {

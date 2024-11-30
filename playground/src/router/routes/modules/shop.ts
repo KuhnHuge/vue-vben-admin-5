@@ -34,9 +34,22 @@ const routes: RouteRecordRaw[] = [
         path: '/productSearch',
         component: () => import('#/views/shop/product-search.vue'),
         meta: {
+          hideInMenu: true,
           icon: 'mdi:search',
           keepAlive: true,
           title: 'Product Search',
+        },
+        children: [],
+      },
+      {
+        name: 'cartSuccess',
+        path: '/cartSuccess',
+        component: () => import('#/views/shop/cart-success.vue'),
+        meta: {
+          hideInMenu: true,
+          // icon: 'mdi:search',
+          // keepAlive: true,
+          title: 'Submit Status',
         },
         children: [],
       },

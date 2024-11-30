@@ -39,3 +39,15 @@ export const MdiInformation = createIconifyIcon('mdi-light:information');
 export const MdiAddShoppingCart = createIconifyIcon('mdi:add-shopping-cart');
 
 export const MdiSearch = createIconifyIcon('mdi:search');
+
+export const MdiFilterCog = createIconifyIcon('mdi:filter-cog');
+
+export const MdiCart = createIconifyIcon('mdi:cart-outline');
+
+export const MdiAdd = createIconifyIcon('mdi:add');
+
+export const MdiBin = createIconifyIcon('mdi:bin-outline');
+
+export const MdiRefresh = createIconifyIcon('mdi:refresh');
+
+export const MdiSend = createIconifyIcon('mdi:send-circle-outline');

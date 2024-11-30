@@ -3,7 +3,7 @@ import type { GtProductItem } from '#/api/gt-api/models';
 
 import { onMounted, type Ref, ref, watch } from 'vue';
 
-import { MdiAddShoppingCart } from '@vben/icons';
+import { MdiCart } from '@vben/icons';
 import { preferences } from '@vben/preferences';
 import { useOrderOnlineStore } from '@vben/stores';
 
@@ -95,10 +95,13 @@ async function addCart(item: GtProductItem, quantity: number) {
           class="product-card m-2.5 flex h-[450px] w-[19rem] flex-col items-center"
         >
           <div
-            class="flex h-[200px] w-full flex-col items-center p-[5%]"
+            class="flex h-[200px] w-full flex-col items-center p-[8%]"
             style="background: #fff"
           >
-            <img :alt="item.my_no" :src="item.picture" class="h-[180px]" />
+            <img :alt="item.my_no" :src="item.picture" class="h-[160px]" />
+          </div>
+          <div class="line-clamp-2 min-h-[40px] w-[95%] text-sm">
+            {{ item.title ?? item.product_name_en }}
           </div>
           <div class="w-full pl-2 pr-2">
             <a-divider style="margin: 12px 0" />
@@ -149,13 +152,13 @@ async function addCart(item: GtProductItem, quantity: number) {
             <a-input-number
               v-model:value="addCartData[index]"
               :min="0"
-              class="w-[205px]"
+              class="w-[225px]"
             />
             <a-button
               type="primary"
               @click="addCart(item, addCartData[index] ?? 0)"
             >
-              <MdiAddShoppingCart width="20px" />
+              <MdiCart width="20px" />
             </a-button>
           </div>
         </div>
@@ -193,5 +196,9 @@ async function addCart(item: GtProductItem, quantity: number) {
   overflow: hidden;
   border-radius: 6px;
   box-shadow: 0 0 0 rgb(179 179 179 / 35%);
+}
+
+.ant-skeleton {
+  min-height: 450px;
 }
 </style>

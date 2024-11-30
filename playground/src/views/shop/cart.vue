@@ -12,7 +12,9 @@ import {
   ref,
   watch,
 } from 'vue';
+import { useRouter } from 'vue-router';
 
+import { MdiAdd, MdiBin, MdiRefresh, MdiSend } from '@vben/icons';
 import { $t } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 import { useOrderOnlineStore, useUserPageStore } from '@vben/stores';
@@ -39,6 +41,10 @@ watch(
   },
 );
 let isMounted = false;
+const router = useRouter();
+const modalOpen = ref(false);
+const modalLoading = ref(false);
+const customOe = ref('');
 const orderOnlineStore = useOrderOnlineStore();
 const userPageStore = useUserPageStore();
 const api = new CartApi();
@@ -63,12 +69,19 @@ const onSelectChange = (keys: number[]) => {
   selectedRowKeys.value = keys;
 };
 const hasSelected = computed(() => selectedRowKeys.value.length > 0);
-async function loadData(withLoading: boolean = true) {
+async function loadData(
+  withLoading: boolean = true,
+  page: number | undefined = undefined,
+  pageSize: number | undefined = undefined,
+) {
   try {
     if (withLoading) {
       loading.value = true;
     }
-    const model = await api.cartList();
+    const model = await api.cartList({
+      pageIndex: page ?? pagination.value.current ?? 1,
+      pageSize: pageSize ?? pagination.value.pageSize ?? 10,
+    });
     if (!model) return;
     dataSource.value = model.data as GtProductItem[];
     pagination.value.current = model.pageIndex;
@@ -80,6 +93,19 @@ async function loadData(withLoading: boolean = true) {
     }
   }
 }
+async function handleCustomOeSubmit() {
+  try {
+    modalLoading.value = true;
+    const model = await api.addCustomOe(customOe.value);
+    if (!model) return;
+    message.success(model.msg);
+    await loadData(false);
+    customOe.value = '';
+  } finally {
+    modalLoading.value = false;
+    modalOpen.value = false;
+  }
+}
 async function removeFromCart(product_ids: string) {
   try {
     loading.value = true;
@@ -88,6 +114,19 @@ async function removeFromCart(product_ids: string) {
   } finally {
     loading.value = false;
   }
+}
+async function submit() {
+  try {
+    loading.value = true;
+    await api.removeFromCart(selectedRowKeys.value.join(','));
+    const randomInt = Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000;
+    await new Promise((resolve) => setTimeout(resolve, randomInt));
+    await loadData(false);
+    selectedRowKeys.value = [];
+  } finally {
+    loading.value = false;
+  }
+  await router.push('/cartSuccess');
 }
 async function removeSelected() {
   try {
@@ -104,7 +143,7 @@ onMounted(async () => {
   columns.value = getColumns();
   await loadData();
   pagination.value.onChange = async (page, pageSize) => {
-    await loadData(page, pageSize);
+    await loadData(true, page, pageSize);
     await updateTableHeight();
     userPageStore.setCartConfig((c) => (c.pageSize = pageSize ?? 10));
   };
@@ -192,7 +231,7 @@ function getColumns(): TbColumnType[] {
       :pagination="pagination"
       :row-selection="{ selectedRowKeys, onChange: onSelectChange }"
       :scroll="{ y: tableMaxHeight }"
-      row-key="product_id"
+      row-key="customer_cart_id"
       stripe
     >
       <template #title>
@@ -204,17 +243,39 @@ function getColumns(): TbColumnType[] {
           "
         >
           <div>
-            <i></i>
-          </div>
-          <div>
             <a-button
               :disabled="!hasSelected"
-              class="mr-2"
+              class="mr-2 flex items-center"
+              type="primary"
+              @click="submit"
+            >
+              <MdiSend width="18" />
+              Submit Selected
+            </a-button>
+          </div>
+          <div class="flex">
+            <a-button
+              :disabled="!hasSelected"
+              class="mr-2 flex items-center"
               @click="removeSelected"
             >
+              <MdiBin width="18" />
               Remove Selected
             </a-button>
-            <a-button type="primary" @click="loadData()">
+            <a-button
+              class="mr-2 flex items-center"
+              type="primary"
+              @click="modalOpen = true"
+            >
+              <MdiAdd width="18" />
+              Add Custom OE
+            </a-button>
+            <a-button
+              class="flex items-center"
+              type="primary"
+              @click="loadData()"
+            >
+              <MdiRefresh width="18" />
               {{ $t('common.refresh') }}
             </a-button>
           </div>
@@ -223,7 +284,7 @@ function getColumns(): TbColumnType[] {
       <template #bodyCell="{ column, record, index }">
         <template v-if="column.key === 'operation'">
           <div class="operation-column">
-            <a-button @click="removeFromCart(record.product_id)">
+            <a-button @click="removeFromCart(record.customer_cart_id)">
               Remove
             </a-button>
           </div>
@@ -233,50 +294,80 @@ function getColumns(): TbColumnType[] {
         </template>
         <template v-if="column.key === 'item info'">
           <div class="flex">
-            <div class="h-[150px] w-[100px] overflow-hidden">
-              <img
+            <div class="flex w-[160px] justify-center" style="background: #fff">
+              <a-image
                 :alt="record.my_no"
                 :src="record.picture"
-                class="h-auto w-full"
+                class="!h-[100px] !w-auto"
               />
             </div>
-            <div
-              class="flex w-[220px] flex-col pl-2.5 pr-2.5"
-              style="font-size: 15px; font-weight: 500"
-            >
+            <div>
+              <div>{{ record.title ?? record.product_name_en }}</div>
               <div
-                :style="`background-color:${infoBackgroundColor}`"
-                class="flex w-full justify-between pl-1 pr-1"
+                :style="`font-size: 14px;background-color:${infoBackgroundColor}`"
+                class="flex w-[220px] flex-col pl-2.5 pr-2.5"
               >
-                <span>OE:</span>
-                <span>{{ record.oe }}</span>
-              </div>
-              <div
-                :style="`background-color:${infoBackgroundColor}`"
-                class="flex w-full justify-between pl-1 pr-1"
-              >
-                <span>NID:</span>
-                <span>{{ record.my_no }}</span>
-              </div>
-              <div
-                :style="`background-color:${infoBackgroundColor}`"
-                class="flex w-full justify-between pl-1 pr-1"
-              >
-                <span>MOQ:</span>
-                <span>{{ record.min_qty }}</span>
-              </div>
-              <div
-                :style="`background-color:${infoBackgroundColor};color: #c9465d`"
-                class="flex w-full justify-between pl-1 pr-1"
-              >
-                <span>PRICE:</span>
-                <span>{{ record.price }}</span>
+                <div
+                  v-if="record.oe"
+                  :style="`background-color:${infoBackgroundColor}`"
+                  class="flex w-full justify-between pl-1 pr-1 pt-1"
+                >
+                  <span>OE:</span>
+                  <span>{{ record.oe }}</span>
+                </div>
+                <div
+                  v-else
+                  :style="`background-color:${infoBackgroundColor}`"
+                  class="flex w-full justify-between pl-1 pr-1 pt-1"
+                >
+                  <span style="color: #c9465d">OE:</span>
+                  <span style="color: #c9465d">{{ record.customer_oe }}</span>
+                </div>
+
+                <div
+                  :style="`background-color:${infoBackgroundColor}`"
+                  class="flex w-full justify-between pl-1 pr-1"
+                >
+                  <span>NID:</span>
+                  <span>{{ record.my_no }}</span>
+                </div>
+                <div
+                  :style="`background-color:${infoBackgroundColor}`"
+                  class="flex w-full justify-between pl-1 pr-1"
+                >
+                  <span>MOQ:</span>
+                  <span>{{ record.min_qty }}</span>
+                </div>
+                <div
+                  :style="`background-color:${infoBackgroundColor};color: #c9465d`"
+                  class="flex w-full justify-between pl-1 pr-1"
+                >
+                  <span>PRICE:</span>
+                  <span>{{ record.price }}</span>
+                </div>
               </div>
             </div>
           </div>
         </template>
       </template>
     </s-table>
+    <a-modal v-model:open="modalOpen" title="Title">
+      <template #footer>
+        <a-button
+          key="submit"
+          :loading="modalLoading"
+          type="primary"
+          @click="handleCustomOeSubmit"
+        >
+          Submit
+        </a-button>
+      </template>
+      <a-textarea
+        v-model:value="customOe"
+        :rows="9"
+        placeholder="Input your own OE"
+      />
+    </a-modal>
   </div>
 </template>
 

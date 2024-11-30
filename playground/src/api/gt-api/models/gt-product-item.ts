@@ -5,4 +5,6 @@ export interface GtProductItem {
   picture?: string;
   price?: string;
   product_id: number;
+  product_name_en?: string;
+  title?: string;
 }
